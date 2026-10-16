@@ -1,0 +1,19 @@
+# Dependencies and build output
+node_modules/
+dist/
+.firebase/
+*.log
+.DS_Store
+
+# Environment files: anywhere in the repo, any variant. Only the examples are committed.
+.env
+.env.*
+!.env.example
+
+# Credentials: never commit these, even by accident
+*service-account*.json
+*-credentials.json
+application_default_credentials.json
+*.pem
+*.p12
+*.key

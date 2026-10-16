@@ -1,0 +1,7 @@
+# Files NOT uploaded to Cloud Build by `gcloud run deploy --source`.
+.gcloudignore
+.env
+.env.*
+node_modules/
+dist/
+*.log
