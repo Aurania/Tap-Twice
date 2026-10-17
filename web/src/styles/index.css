@@ -42,6 +42,39 @@
   .tt-toast-in {
     animation: tt-toast-in 220ms ease-out;
   }
+  .tt-pop {
+    animation: tt-pop 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .tt-ripple-out {
+    animation: tt-ripple-out 700ms ease-out both;
+  }
+  .tt-scan {
+    animation: tt-scan 1.6s ease-in-out infinite;
+  }
+  .tt-rise {
+    animation: tt-rise 260ms ease-out both;
+  }
+}
+
+@keyframes tt-ripple-out {
+  from { transform: scale(0.35); opacity: 0; }
+  40% { opacity: 1; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes tt-pop {
+  from { transform: scale(0.4); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes tt-scan {
+  0%, 100% { transform: translateY(-22px); }
+  50% { transform: translateY(22px); }
+}
+
+@keyframes tt-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes tt-sheet-in {
