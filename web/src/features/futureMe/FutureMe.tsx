@@ -82,7 +82,8 @@ export function FutureMe() {
   }, [cart]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    endRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "end" });
   }, [chat.messages.length, reply, failed, checking]);
 
   if (!cart) return leaving.current ? null : <Navigate to="/home" replace />;
