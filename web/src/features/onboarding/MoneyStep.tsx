@@ -2,23 +2,19 @@ import { useNavigate } from "react-router";
 import { useI18n } from "@/i18n/I18nProvider";
 import { parseRupiah } from "@/lib/money";
 import { Button, ChoiceChip, MoneyField, TextField } from "@/ui";
-import { OnboardingHeader, OnboardingScreen, useOnboardingDraft, type WorkPreset } from "./OnboardingLayout";
+import { hoursPerWeek, OnboardingHeader, OnboardingScreen, useEditMode, useOnboardingDraft, type WorkPreset } from "./OnboardingLayout";
 
 const PRESETS: Record<Exclude<WorkPreset, "varies">, { hoursPerDay: string; daysPerWeek: string }> = {
   "9to5": { hoursPerDay: "8", daysPerWeek: "5" },
   shifts: { hoursPerDay: "8", daysPerWeek: "6" },
 };
 
-/** hoursPerWeek = hoursPerDay × daysPerWeek (BACKEND_GAPS.md #2). Not money. */
-export function hoursPerWeek(hoursPerDay: string, daysPerWeek: string): number {
-  return (Number(hoursPerDay) || 0) * (Number(daysPerWeek) || 0);
-}
-
 /** 01a Onboarding · Money. Currency fixed to IDR and income required (gaps #1, #3). */
 export function MoneyStep() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { draft, update } = useOnboardingDraft();
+  const edit = useEditMode();
 
   const income = parseRupiah(draft.income);
   const weekly = hoursPerWeek(draft.hoursPerDay, draft.daysPerWeek);
@@ -30,7 +26,7 @@ export function MoneyStep() {
 
   return (
     <OnboardingScreen>
-      <OnboardingHeader step={1} onBack={() => navigate("/welcome/4")} />
+      <OnboardingHeader step={1} onBack={edit.editing ? edit.back : () => navigate("/welcome/4")} showLanguage={!edit.editing} />
       <h1 className="tt-h1 mt-4">{t("onboarding.moneyTitle")}</h1>
       <p className="tt-body mt-2 text-ink-2">{t("onboarding.moneySub")}</p>
 
@@ -38,7 +34,9 @@ export function MoneyStep() {
         className="mt-6 flex flex-1 flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (canContinue) navigate("/onboarding/goal");
+          if (!canContinue) return;
+          if (edit.editing) void edit.saveEdit(draft);
+          else navigate("/onboarding/goal");
         }}
       >
         <TextField
@@ -97,8 +95,13 @@ export function MoneyStep() {
           <p className="tt-small -mt-2 text-warn">{t("onboarding.hoursInvalid", { hours: weekly })}</p>
         )}
 
-        <Button type="submit" className="mt-auto" disabled={!canContinue}>
-          {t("common.next")}
+        {edit.error && (
+          <p role="alert" className="tt-small text-center text-warn">
+            {t("onboarding.saveError")}
+          </p>
+        )}
+        <Button type="submit" className="mt-auto" disabled={!canContinue || edit.saving}>
+          {edit.editing ? t("common.save") : t("common.next")}
         </Button>
       </form>
     </OnboardingScreen>
