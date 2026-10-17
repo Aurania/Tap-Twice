@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
-import type { Profile } from "@/api";
 import { useI18n } from "@/i18n/I18nProvider";
-import { parseRupiah } from "@/lib/money";
 import { KEYS, writeKey } from "@/lib/storage";
 import { useProfile } from "@/state/ProfileProvider";
 import { Button, Mark } from "@/ui";
-import { hoursPerWeek } from "./MoneyStep";
-import { OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./OnboardingLayout";
+import { draftToProfile, OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./OnboardingLayout";
 
 /** 01c Onboarding · Avoid interest. Either answer saves the profile (PUT /api/profile) and opens Home. */
 export function InterestStep() {
@@ -18,29 +15,13 @@ export function InterestStep() {
   const [saving, setSaving] = useState<boolean | null>(null);
   const [error, setError] = useState(false);
 
-  const income = parseRupiah(draft.income);
-  const target = parseRupiah(draft.target);
-  const joy = parseRupiah(draft.joy ?? "");
-  if (!income || !target || !draft.targetDate || joy === null) return <Navigate to="/onboarding/money" replace />;
+  const profile = draftToProfile(draft, lang);
+  if (!profile) return <Navigate to="/onboarding/money" replace />;
 
   const finish = async (avoidInterest: boolean) => {
     // Not in the API yet: kept on this device and used only for "Contains interest" chips (gaps #3).
     writeKey(KEYS.avoidInterest, String(avoidInterest));
     update({ avoidInterest });
-    const nickname = draft.nickname.trim();
-    const profile: Profile = {
-      ...(nickname ? { nickname } : {}),
-      monthlyIncome: income,
-      hoursPerWeek: hoursPerWeek(draft.hoursPerDay, draft.daysPerWeek),
-      joyBudget: joy,
-      goal: {
-        name: draft.goalName.trim(),
-        targetAmount: target,
-        savedAmount: parseRupiah(draft.saved) ?? 0,
-        targetDate: draft.targetDate!,
-      },
-      language: lang,
-    };
     setSaving(avoidInterest);
     setError(false);
     try {

@@ -39,7 +39,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         aria-live="polite"
         className={cx(
           "pointer-events-none fixed inset-x-0 z-50 mx-auto flex max-w-[430px] justify-center px-4",
-          toast?.position === "bottom" ? "bottom-[max(24px,env(safe-area-inset-bottom))]" : "top-[max(16px,env(safe-area-inset-top))]",
+          toast?.position === "bottom" ? "bottom-[calc(max(24px,env(safe-area-inset-bottom))+72px)]" : "top-[max(16px,env(safe-area-inset-top))]",
         )}
       >
         {toast && (

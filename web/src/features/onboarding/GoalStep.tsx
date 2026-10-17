@@ -6,7 +6,7 @@ import { formatMonthYear, upcomingMonths } from "@/lib/dates";
 import { parseRupiah, rupiahInput } from "@/lib/money";
 import { BottomSheet, Button, CheckIcon, MoneyField, TextField } from "@/ui";
 import { ChevronDown } from "lucide-react";
-import { OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./OnboardingLayout";
+import { OnboardingHeader, OnboardingScreen, useEditMode, useOnboardingDraft } from "./OnboardingLayout";
 
 /**
  * 01b Onboarding · Goal. Goal is required for now, so the "Just spend less" segment and
@@ -16,6 +16,7 @@ export function GoalStep() {
   const navigate = useNavigate();
   const { t, lang } = useI18n();
   const { draft, update } = useOnboardingDraft();
+  const edit = useEditMode();
   const [monthsOpen, setMonthsOpen] = useState(false);
   const income = parseRupiah(draft.income);
 
@@ -32,7 +33,7 @@ export function GoalStep() {
 
   return (
     <OnboardingScreen>
-      <OnboardingHeader step={2} onBack={() => navigate("/onboarding/money")} showLanguage={false} />
+      <OnboardingHeader step={2} onBack={edit.editing ? edit.back : () => navigate("/onboarding/money")} showLanguage={false} />
       <h1 className="tt-h1 mt-4">{t("onboarding.goalTitle")}</h1>
       <p className="tt-body mt-2 text-ink-2">{t("onboarding.goalSub")}</p>
 
@@ -40,7 +41,9 @@ export function GoalStep() {
         className="mt-6 flex flex-1 flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (canContinue) navigate("/onboarding/interest");
+          if (!canContinue) return;
+          if (edit.editing) void edit.saveEdit(draft);
+          else navigate("/onboarding/interest");
         }}
       >
         <TextField
@@ -75,8 +78,13 @@ export function GoalStep() {
 
         <MoneyField label={t("onboarding.joyBudget")} value={draft.joy ?? ""} onChange={(joy) => update({ joy })} helper={t("onboarding.joyHelp")} />
 
-        <Button type="submit" className="mt-auto" disabled={!canContinue}>
-          {t("common.next")}
+        {edit.error && (
+          <p role="alert" className="tt-small text-center text-warn">
+            {t("onboarding.saveError")}
+          </p>
+        )}
+        <Button type="submit" className="mt-auto" disabled={!canContinue || edit.saving}>
+          {edit.editing ? t("common.save") : t("common.next")}
         </Button>
       </form>
 
