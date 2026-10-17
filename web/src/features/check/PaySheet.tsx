@@ -11,7 +11,7 @@ import { BagIcon, BottomSheet, Button, CalendarIcon, ChevronIcon, Chip, OptionRo
  * 05e "How are you paying?" Pay in full is first and selected (rule 6). Log it →
  * POST /api/decisions { action: "buy" } → 05f Logged.
  */
-export function PaySheet({ open, onClose, cost }: { open: boolean; onClose: () => void; cost: Cost }) {
+export function PaySheet({ open, onClose, cost, onPickPlan }: { open: boolean; onClose: () => void; cost: Cost; onPickPlan: () => void }) {
   const navigate = useNavigate();
   const { t, lang } = useI18n();
   const { cart, paylater } = useCartCheck();
@@ -65,10 +65,7 @@ export function PaySheet({ open, onClose, cost }: { open: boolean; onClose: () =
           // No plan yet: open the paylater picker (BACKEND_GAPS.md #17).
           <OptionRow
             selected={false}
-            onClick={() => {
-              onClose();
-              navigate("/check/paylater");
-            }}
+            onClick={onPickPlan}
             icon={<CalendarIcon className="size-5" />}
             title={t("pay.paylaterPick")}
             detail={t("pay.paylaterPickDetail")}

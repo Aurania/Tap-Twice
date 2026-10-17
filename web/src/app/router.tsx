@@ -2,9 +2,11 @@ import { createBrowserRouter, Navigate } from "react-router";
 import { Splash } from "@/features/boot/Splash";
 import { Confirm } from "@/features/check/Confirm";
 import { Logged } from "@/features/check/Logged";
+import { PaylaterRealCost } from "@/features/check/PaylaterRealCost";
 import { Reading } from "@/features/check/Reading";
 import { Reality } from "@/features/check/Reality";
 import { ComponentsPage } from "@/features/dev/ComponentsPage";
+import { FutureMe } from "@/features/futureMe/FutureMe";
 import { Placeholder } from "@/features/dev/Placeholder";
 import { Home } from "@/features/home/Home";
 import { GoalStep } from "@/features/onboarding/GoalStep";
@@ -39,8 +41,8 @@ export const router = createBrowserRouter([
       { path: "/check/confirm", element: <Confirm /> },
       { path: "/check/reality", element: <Reality /> },
       { path: "/check/logged", element: <Logged /> },
-      { path: "/check/paylater", element: <Placeholder screen="06 Paylater · Real cost" phase={3} /> },
-      { path: "/check/future-me", element: <Placeholder screen="07 Future Me" phase={3} /> },
+      { path: "/check/paylater", element: <PaylaterRealCost /> },
+      { path: "/check/future-me", element: <FutureMe /> },
       { path: "/saved", element: <Saved /> },
       { path: "/settings", element: <Placeholder screen="10 Settings" phase={4} /> },
       { path: "/dev/components", element: <ComponentsPage /> },

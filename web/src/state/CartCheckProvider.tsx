@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import type { Cart, ExtractResponse, Paylater, ReflectResponse } from "@/api";
-import { paylaterFromExtraction } from "@/lib/paylater";
+import type { Cart, ChatMessage, ExtractResponse, Paylater, ReflectResponse } from "@/api";
+import { paylaterFromExtraction, type PaylaterInfo } from "@/lib/paylater";
 
 export type CartRow = { id: string; name: string; quantity: number; unitPrice: number };
 
@@ -27,10 +27,26 @@ type CartCheckState = {
   /** The confirmed cart sent to /api/reflect. */
   cart: Cart | null;
   paylater: Paylater | null;
+  /** Which provider and rate source the paylater terms came from (shown on 06). */
+  paylaterInfo: PaylaterInfo | null;
   result: ReflectResponse | null;
+  /** Future Me conversation for this cart, kept while moving between screens. */
+  chat: ChatState;
 };
 
-const EMPTY: CartCheckState = { file: null, extract: null, draft: null, cart: null, paylater: null, result: null };
+export type ChatState = { messages: ChatMessage[]; turnsLeft: number | null; ended: boolean };
+const EMPTY_CHAT: ChatState = { messages: [], turnsLeft: null, ended: false };
+
+const EMPTY: CartCheckState = {
+  file: null,
+  extract: null,
+  draft: null,
+  cart: null,
+  paylater: null,
+  paylaterInfo: null,
+  result: null,
+  chat: EMPTY_CHAT,
+};
 
 let rowSeq = 0;
 const newRowId = () => `row-${++rowSeq}`;
@@ -72,8 +88,11 @@ type CartCheckValue = CartCheckState & {
   addRow: (row: Omit<CartRow, "id">) => void;
   /** Freezes the edited draft into the cart for the reality card. */
   confirm: () => Cart | null;
-  setPaylater: (p: Paylater | null) => void;
+  setPaylater: (p: Paylater | null, info: PaylaterInfo | null) => void;
   setResult: (r: ReflectResponse | null) => void;
+  /** Swap in new numbers (after a paylater change) and keep the reflection. */
+  setCost: (cost: ReflectResponse["cost"]) => void;
+  setChat: (update: (chat: ChatState) => ChatState) => void;
   reset: () => void;
 };
 
@@ -131,18 +150,33 @@ export function CartCheckProvider({ children }: { children: ReactNode }) {
         .map((r) => ({ name: r.name.trim().slice(0, 200), quantity: Math.round(r.quantity), unitPrice: Math.max(0, r.unitPrice) })),
       total,
     };
-    const paylater = extract.idr ? paylaterFromExtraction(extract.idr, total) : null;
-    setState((s) => ({ ...s, cart, paylater: s.paylater ?? paylater, result: null }));
+    const prefill = extract.idr ? paylaterFromExtraction(extract.idr, total) : null;
+    setState((s) => ({
+      ...s,
+      cart,
+      paylater: prefill?.paylater ?? null,
+      paylaterInfo: prefill?.info ?? null,
+      result: null,
+      chat: EMPTY_CHAT,
+    }));
     return cart;
   }, [state]);
 
-  const setPaylater = useCallback((paylater: Paylater | null) => setState((s) => ({ ...s, paylater })), []);
+  const setPaylater = useCallback(
+    (paylater: Paylater | null, paylaterInfo: PaylaterInfo | null) => setState((s) => ({ ...s, paylater, paylaterInfo })),
+    [],
+  );
   const setResult = useCallback((result: ReflectResponse | null) => setState((s) => ({ ...s, result })), []);
+  const setCost = useCallback(
+    (cost: ReflectResponse["cost"]) => setState((s) => ({ ...s, result: { reflection: s.result?.reflection ?? null, cost } })),
+    [],
+  );
+  const setChat = useCallback((update: (chat: ChatState) => ChatState) => setState((s) => ({ ...s, chat: update(s.chat) })), []);
   const reset = useCallback(() => setState(EMPTY), []);
 
   const value = useMemo<CartCheckValue>(
-    () => ({ ...state, start, setExtract, updateDraft, updateRow, removeRow, addRow, confirm, setPaylater, setResult, reset }),
-    [state, start, setExtract, updateDraft, updateRow, removeRow, addRow, confirm, setPaylater, setResult, reset],
+    () => ({ ...state, start, setExtract, updateDraft, updateRow, removeRow, addRow, confirm, setPaylater, setResult, setCost, setChat, reset }),
+    [state, start, setExtract, updateDraft, updateRow, removeRow, addRow, confirm, setPaylater, setResult, setCost, setChat, reset],
   );
   return <CartCheckContext.Provider value={value}>{children}</CartCheckContext.Provider>;
 }

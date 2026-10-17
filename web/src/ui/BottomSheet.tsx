@@ -47,7 +47,7 @@ export function BottomSheet({ open, onClose, title, description, children }: Pro
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         tabIndex={-1}
-        className="tt-sheet-in relative w-full max-w-[430px] rounded-t-sheet bg-page px-5 pt-2.5 pb-[max(24px,env(safe-area-inset-bottom))] shadow-lg outline-none"
+        className="tt-sheet-in relative max-h-[92dvh] w-full max-w-[430px] overflow-y-auto overscroll-contain rounded-t-sheet bg-page px-5 pt-2.5 pb-[max(24px,env(safe-area-inset-bottom))] shadow-lg outline-none"
       >
         <div aria-hidden className="mx-auto mb-4 h-1 w-9 rounded-pill bg-line" />
         <h2 id={titleId} className="tt-h2 text-ink">
