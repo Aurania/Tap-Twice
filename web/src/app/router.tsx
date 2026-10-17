@@ -1,29 +1,47 @@
 import { createBrowserRouter, Navigate } from "react-router";
+import { Splash } from "@/features/boot/Splash";
+import { Confirm } from "@/features/check/Confirm";
+import { Logged } from "@/features/check/Logged";
+import { Reading } from "@/features/check/Reading";
+import { Reality } from "@/features/check/Reality";
 import { ComponentsPage } from "@/features/dev/ComponentsPage";
 import { Placeholder } from "@/features/dev/Placeholder";
+import { Home } from "@/features/home/Home";
+import { GoalStep } from "@/features/onboarding/GoalStep";
+import { InterestStep } from "@/features/onboarding/InterestStep";
+import { MoneyStep } from "@/features/onboarding/MoneyStep";
+import { OnboardingLayout } from "@/features/onboarding/OnboardingLayout";
+import { Saved } from "@/features/saved/Saved";
+import { Welcome } from "@/features/welcome/Welcome";
 import { RootLayout } from "./RootLayout";
 
-/**
- * Routes from docs/frontend/SCREENS.md. Sheets are not routes.
- * Screens arrive in phase 2–4; until then each route shows a placeholder.
- */
+/** Routes from docs/frontend/SCREENS.md. Sheets are not routes. */
 export const router = createBrowserRouter([
   {
     element: <RootLayout />,
     children: [
-      { path: "/", element: <Placeholder screen="Splash / boot" phase={2} /> },
-      { path: "/welcome/:step", element: <Placeholder screen="Welcome W1–W4" phase={2} /> },
-      { path: "/onboarding/:step", element: <Placeholder screen="Onboarding 01a–01c" phase={2} /> },
-      { path: "/home", element: <Placeholder screen="02 Home" phase={2} /> },
-      { path: "/check/reading", element: <Placeholder screen="03 Reading" phase={2} /> },
+      { path: "/", element: <Splash /> },
+      { path: "/welcome/:step", element: <Welcome /> },
+      {
+        path: "/onboarding",
+        element: <OnboardingLayout />,
+        children: [
+          { index: true, element: <Navigate to="money" replace /> },
+          { path: "money", element: <MoneyStep /> },
+          { path: "goal", element: <GoalStep /> },
+          { path: "interest", element: <InterestStep /> },
+        ],
+      },
+      { path: "/home", element: <Home /> },
+      { path: "/check/reading", element: <Reading /> },
       { path: "/check/not-a-cart", element: <Placeholder screen="03b Not a cart" phase={4} /> },
       { path: "/check/error", element: <Placeholder screen="03c Couldn't read it" phase={4} /> },
-      { path: "/check/confirm", element: <Placeholder screen="04 Confirm items" phase={2} /> },
-      { path: "/check/reality", element: <Placeholder screen="05 Reality card" phase={2} /> },
-      { path: "/check/logged", element: <Placeholder screen="05f Bought · Logged" phase={2} /> },
+      { path: "/check/confirm", element: <Confirm /> },
+      { path: "/check/reality", element: <Reality /> },
+      { path: "/check/logged", element: <Logged /> },
       { path: "/check/paylater", element: <Placeholder screen="06 Paylater · Real cost" phase={3} /> },
       { path: "/check/future-me", element: <Placeholder screen="07 Future Me" phase={3} /> },
-      { path: "/saved", element: <Placeholder screen="08 Saved for later" phase={2} /> },
+      { path: "/saved", element: <Saved /> },
       { path: "/settings", element: <Placeholder screen="10 Settings" phase={4} /> },
       { path: "/dev/components", element: <ComponentsPage /> },
       { path: "*", element: <Navigate to="/" replace /> },

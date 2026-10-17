@@ -7,6 +7,7 @@ export { CircleButton } from "./CircleButton";
 export { Disclaimer } from "./Disclaimer";
 export { LanguageSwitch } from "./LanguageSwitch";
 export { Mark, MarkLabel } from "./Mark";
+export { MoneyField } from "./MoneyField";
 export { Notice } from "./Notice";
 export { OptionRow } from "./OptionRow";
 export { ProgressRing } from "./ProgressRing";

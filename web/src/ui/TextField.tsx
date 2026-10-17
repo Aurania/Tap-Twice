@@ -21,7 +21,7 @@ export function TextField({ label, value, onChange, showCounter, helper, prefix,
   const inputId = id ?? autoId;
   const helperId = `${inputId}-help`;
   return (
-    <div className={className}>
+    <div className={cx("min-w-0", className)}>
       <label htmlFor={inputId} className="tt-small mb-1.5 block text-ink-2">
         {label}
       </label>
