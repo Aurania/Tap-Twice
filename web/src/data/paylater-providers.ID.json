@@ -1,0 +1,63 @@
+{
+  "market": "ID",
+  "checkedAt": "2026-10-16",
+  "providers": [
+    {
+      "id": "spaylater",
+      "name": "SPayLater",
+      "tenorsMonths": [
+        3,
+        6,
+        12
+      ],
+      "typicalMonthlyRateFrom": 0.0295,
+      "serviceFeeRate": 0.01,
+      "note": "Lighter promo rates for some users. Late fee is separate.",
+      "sourceUrl": "https://finansial.bisnis.com/read/20261001/563/2008913/daftar-paylater-bunga-rendah-oktober-2026-bandingkan-bunga-biaya-dan-tenornya"
+    },
+    {
+      "id": "gopaylater",
+      "name": "GoPay Later",
+      "tenorsMonths": null,
+      "typicalMonthlyRateFrom": 0.02,
+      "serviceFeeRate": null,
+      "note": "Fixed-interest scheme. Tenors depend on your account.",
+      "sourceUrl": "https://finansial.bisnis.com/read/20261001/563/2008913/daftar-paylater-bunga-rendah-oktober-2026-bandingkan-bunga-biaya-dan-tenornya"
+    },
+    {
+      "id": "kredivo",
+      "name": "Kredivo",
+      "tenorsMonths": [
+        1,
+        3,
+        6,
+        12,
+        18,
+        24
+      ],
+      "typicalMonthlyRateFrom": 0.0199,
+      "serviceFeeRate": 0,
+      "note": "0% if paid within 30 days (tenor 1). Installments from 1.99%/month.",
+      "sourceUrl": "https://finansial.bisnis.com/read/20261001/563/2008913/daftar-paylater-bunga-rendah-oktober-2026-bandingkan-bunga-biaya-dan-tenornya"
+    },
+    {
+      "id": "akulaku",
+      "name": "Akulaku PayLater",
+      "tenorsMonths": null,
+      "typicalMonthlyRateFrom": null,
+      "serviceFeeRate": null,
+      "note": "Rates vary by user. Check the Akulaku app.",
+      "sourceUrl": null
+    },
+    {
+      "id": "other",
+      "name": "Others",
+      "tenorsMonths": null,
+      "typicalMonthlyRateFrom": null,
+      "serviceFeeRate": null,
+      "note": "User types the plan.",
+      "sourceUrl": null
+    }
+  ],
+  "note": "Static config for the paylater picker (sheet 06a). Typical 'from' rates only: real rates differ per person and promo. Refresh by editing this file; keep checkedAt and sourceUrl up to date."
+}

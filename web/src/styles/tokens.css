@@ -1,0 +1,98 @@
+/* Tap Twice design tokens. Exported from Figma (file EBxd7b9Wc8YsmIF9mO0sY6, page "Foundations").
+   Names mirror the Figma variables' code syntax (var(--tt-...)). Do not hardcode colors in components. */
+
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  /* Color · background */
+  --tt-color-bg-page: #ffffff;
+  --tt-color-bg-surface: #efefea; /* cards, secondary buttons */
+  --tt-color-bg-soft: #e3e8ff; /* chat background, selected rows, soft chips */
+  --tt-color-bg-inverse: #0b1033; /* navy cards, toasts, scrim (at 55%) */
+  --tt-color-bg-warning: #fff1e6;
+
+  /* Color · action */
+  --tt-color-action-primary: #3d5afe; /* primary buttons, brand blue screens */
+  --tt-color-action-highlight: #ffd84d; /* stickers, highlight chips, ripple dot */
+
+  /* Color · text */
+  --tt-color-text-primary: #0b1033;
+  --tt-color-text-secondary: #5e6178;
+  --tt-color-text-on-action: #ffffff;
+  --tt-color-text-on-inverse: #ffffff;
+  --tt-color-text-link: #2a44d8;
+  --tt-color-text-highlight: #ffd84d;
+  --tt-color-text-warning: #9a4b00;
+
+  /* Color · border */
+  --tt-color-border-default: #e6e6ea;
+  --tt-color-border-strong: #0b1033;
+
+  /* Spacing */
+  --tt-spacing-xs: 4px;
+  --tt-spacing-sm: 8px;
+  --tt-spacing-md: 12px;
+  --tt-spacing-lg: 16px;
+  --tt-spacing-xl: 20px; /* screen side padding */
+  --tt-spacing-2xl: 24px;
+  --tt-spacing-3xl: 32px;
+
+  /* Radius */
+  --tt-radius-sm: 12px;
+  --tt-radius-md: 16px; /* inputs, rows */
+  --tt-radius-lg: 20px; /* cards */
+  --tt-radius-sheet: 28px; /* bottom sheet top corners */
+  --tt-radius-xl: 36px;
+  --tt-radius-full: 999px; /* buttons, chips */
+
+  /* Shadow (navy-tinted, as used on cards, bubbles and stickers) */
+  --tt-shadow-sm: 0 6px 16px rgb(11 16 51 / 0.08);
+  --tt-shadow-md: 0 8px 20px rgb(11 16 51 / 0.14);
+  --tt-shadow-lg: 0 10px 24px rgb(11 16 51 / 0.18);
+
+  /* Type families */
+  --tt-font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --tt-font-ui: "Inter", system-ui, sans-serif;
+}
+
+/* Tailwind v4 theme mapping: bg-page, bg-surface, text-ink, rounded-card, font-display, etc. */
+@theme inline {
+  --color-page: var(--tt-color-bg-page);
+  --color-surface: var(--tt-color-bg-surface);
+  --color-soft: var(--tt-color-bg-soft);
+  --color-inverse: var(--tt-color-bg-inverse);
+  --color-warning-bg: var(--tt-color-bg-warning);
+  --color-action: var(--tt-color-action-primary);
+  --color-highlight: var(--tt-color-action-highlight);
+  --color-ink: var(--tt-color-text-primary);
+  --color-ink-2: var(--tt-color-text-secondary);
+  --color-link: var(--tt-color-text-link);
+  --color-warn: var(--tt-color-text-warning);
+  --color-line: var(--tt-color-border-default);
+
+  --radius-sm: var(--tt-radius-sm);
+  --radius-md: var(--tt-radius-md);
+  --radius-card: var(--tt-radius-lg);
+  --radius-sheet: var(--tt-radius-sheet);
+  --radius-pill: var(--tt-radius-full);
+
+  --font-display: var(--tt-font-display);
+  --font-ui: var(--tt-font-ui);
+
+  --shadow-sm: var(--tt-shadow-sm);
+  --shadow-md: var(--tt-shadow-md);
+  --shadow-lg: var(--tt-shadow-lg);
+}
+
+/* Text styles (Figma text styles). Use as classes. */
+.tt-hero { font: 800 52px/1 var(--tt-font-display); }
+.tt-greeting { font: 800 32px/1.1 var(--tt-font-display); }
+.tt-h1 { font: 800 26px/1.12 var(--tt-font-display); }
+.tt-h2 { font: 700 20px/1.2 var(--tt-font-display); }
+.tt-number { font: 800 22px/1.2 var(--tt-font-display); }
+.tt-body-lg { font: 600 16px/1.35 var(--tt-font-ui); }
+.tt-body { font: 400 15px/1.4 var(--tt-font-ui); }
+.tt-body-strong { font: 600 15px/1.4 var(--tt-font-ui); }
+.tt-small { font: 400 13px/1.4 var(--tt-font-ui); }
+.tt-caption { font: 500 12px/1.3 var(--tt-font-ui); }
+.tt-link { font: 600 14px/1.35 var(--tt-font-ui); color: var(--tt-color-text-link); }
