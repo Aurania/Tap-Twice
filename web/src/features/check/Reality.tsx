@@ -4,7 +4,7 @@ import { api, ApiError, type ReflectResponse } from "@/api";
 import { useI18n } from "@/i18n/I18nProvider";
 import { formatDays, formatHours, formatIDR, formatIDRCompact, formatIDRSigned } from "@/lib/format";
 import { useCountUp } from "@/lib/useCountUp";
-import { cartTitle, useCartCheck } from "@/state/CartCheckProvider";
+import { useCartCheck } from "@/state/CartCheckProvider";
 import { useProfile } from "@/state/ProfileProvider";
 import {
   BagIcon,
@@ -19,24 +19,23 @@ import {
   SparkleIcon,
   StatCard,
   Sticker,
-  useToast,
 } from "@/ui";
+import { PaylaterFlow } from "./PaylaterFlow";
 import { PaySheet } from "./PaySheet";
+import { useSaveForLater } from "./useSaveForLater";
 
 /** 05 Reality card. One POST /api/reflect when it opens; every number comes from the API. */
 export function Reality() {
   const navigate = useNavigate();
   const { t, lang } = useI18n();
-  const toast = useToast();
   const { profile } = useProfile();
-  const { cart, paylater, result, setResult, reset } = useCartCheck();
+  const { cart, paylater, result, setResult } = useCartCheck();
   const [failed, setFailed] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const job = useRef<Promise<ReflectResponse> | null>(null);
-  // Set while leaving so clearing the cart doesn't trigger the guard redirect below.
-  const leaving = useRef(false);
+  const { save: saveForLater, saving, leaving } = useSaveForLater();
+  const [paylaterOpen, setPaylaterOpen] = useState(false);
 
   useEffect(() => {
     if (!cart || result) return;
@@ -61,24 +60,6 @@ export function Reality() {
   const retry = () => {
     setFailed(false);
     setAttempt((n) => n + 1);
-  };
-
-  const saveForLater = async () => {
-    setSaving(true);
-    const title = cartTitle(cart, t);
-    try {
-      // Save = wishlist item + a "save" decision (BACKEND_GAPS.md #7).
-      await Promise.all([
-        api.addWishlist({ name: title, price: cart.total, merchant: cart.merchant ?? null }),
-        api.addDecision({ action: "save", title, total: cart.total }),
-      ]);
-      leaving.current = true;
-      navigate("/saved", { replace: true, state: { justSaved: true } });
-      reset();
-    } catch {
-      setSaving(false);
-      toast({ message: t("saved.saveError"), position: "bottom" });
-    }
   };
 
   const delay = cost?.goal.delayDays;
@@ -142,7 +123,7 @@ export function Reality() {
 
         <button
           type="button"
-          onClick={() => navigate("/check/paylater")}
+          onClick={() => setPaylaterOpen(true)}
           className="mt-3 flex items-center gap-3 rounded-card bg-inverse px-4 py-3.5 text-left text-white"
         >
           <span className="min-w-0 flex-1">
@@ -171,7 +152,18 @@ export function Reality() {
         <Disclaimer className="mt-auto pt-6" />
       </section>
 
-      {cost && <PaySheet open={payOpen} onClose={() => setPayOpen(false)} cost={cost} />}
+      {cost && (
+        <PaySheet
+          open={payOpen}
+          onClose={() => setPayOpen(false)}
+          cost={cost}
+          onPickPlan={() => {
+            setPayOpen(false);
+            setPaylaterOpen(true);
+          }}
+        />
+      )}
+      <PaylaterFlow open={paylaterOpen} onClose={() => setPaylaterOpen(false)} />
     </main>
   );
 }
