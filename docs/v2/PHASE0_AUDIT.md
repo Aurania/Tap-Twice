@@ -122,3 +122,13 @@ Source of truth for v2: `tap-twice-v2-handoff.md` + decisions in the chat (below
 - **Copy I wrote (not in Figma):** the hero says "This costs you" (Figma: "These shoes cost you", which needs a product noun), "Looking at your product" (Figma: "your shoes"), pocket descriptions for Gadgets, Entertainment and Travel ("Everyday style stuff" is Figma's for Fashion), N10 body in ID.
 - **Assumptions:** "Check my reality" sits right under the content as in Figma; the product photo is only shown in memory during Reading; the price from the AI is treated as already in the profile currency.
 - **Dev only:** Home has "Spend $278/$330 in Fashion" buttons to reach Not healthy and Pocket empty.
+
+## Phase 7 log: Future Me
+
+- **Checked against Figma** `2026:3208` (nudge 02a), `3354` (chat 02b), `3734` (07e). The chat sheet and the nudge match the 02a/02b layout (robot header with close, grey bubble, outlined quick replies, input pill with send, buttons). **07e in the final flow is still the old full-screen v1 chat** ("Future Sarah", cart and PayLater comparison, Buy it / Save for later); the md lists it as an existing negative state, so I kept its error copy ("Hmm, I couldn't reach future you just now 😵 Your numbers are safe." + "Try again") and put it in the v2 sheet.
+- **Role (your decision):** a pocket-aware reflection chat; no alternative products. The Figma nudge and chat text offer cheaper alternatives; I replaced them, so those lines are mine. Opens the conversation itself, streams, 6 of your messages, then the input goes away ("Chat ended · 6 of 6 replies").
+- **Entry points:** Home robot (about your pockets), Reality card "Ask Future Me" in all three states (about the checked product), and the Home nudge.
+- **AI disclaimer** "AI can make mistakes. Double-check the numbers." sits under the input in the sheet and stays after the chat ends.
+- **Assumptions to confirm (design TODOs):** the nudge trigger (shown once on Home after leaving a Not healthy or Pocket empty card with "Not now"; the handoff gives none), the quick replies ("Can it wait?", "How did you get these numbers?", "How are my pockets?", "What should I watch?"), the 07e layout inside the sheet, and the checked-product pill.
+- **Bug found while testing:** React's dev double-mount cancelled the chat's first request (shared AbortController); fixed with one controller per mount.
+- **Still mock:** replies come from `MockAiService` (templated from the server's numbers). The real provider is phase 9.

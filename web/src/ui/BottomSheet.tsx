@@ -4,8 +4,11 @@ import { createPortal } from "react-dom";
 type Props = {
   open: boolean;
   onClose: () => void;
-  title: ReactNode;
+  /** Plain heading. Leave out when `header` draws its own. */
+  title?: ReactNode;
   description?: ReactNode;
+  /** Custom header (an avatar and a close button, for Future Me). Give its heading the `titleId` it receives. */
+  header?: (titleId: string) => ReactNode;
   children: ReactNode;
 };
 
@@ -13,7 +16,7 @@ type Props = {
  * Figma bottom sheet: white, top radius 28, grabber, navy scrim at 55 %.
  * Slides up; Escape or a tap on the scrim closes it; focus returns to the opener.
  */
-export function BottomSheet({ open, onClose, title, description, children }: Props) {
+export function BottomSheet({ open, onClose, title, description, header, children }: Props) {
   const titleId = useId();
   const descId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -50,9 +53,13 @@ export function BottomSheet({ open, onClose, title, description, children }: Pro
         className="tt-sheet-in relative max-h-[92dvh] w-full max-w-[430px] overflow-y-auto overscroll-contain rounded-t-sheet bg-page px-5 pt-2.5 pb-[max(24px,env(safe-area-inset-bottom))] shadow-lg outline-none"
       >
         <div aria-hidden className="mx-auto mb-4 h-1 w-9 rounded-pill bg-line" />
-        <h2 id={titleId} className="tt-h2 text-ink">
-          {title}
-        </h2>
+        {header ? (
+          header(titleId)
+        ) : (
+          <h2 id={titleId} className="tt-h2 text-ink">
+            {title}
+          </h2>
+        )}
         {description && (
           <p id={descId} className="tt-small mt-1 text-ink-2">
             {description}

@@ -5,6 +5,8 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { formatMoney } from "@/lib/format";
 import { useCountUp } from "@/lib/useCountUp";
 import { ai } from "@/services/ai";
+import { useFutureMe } from "@/features/futureMe/FutureMeProvider";
+import type { CheckedProduct } from "@/services/ai";
 import { useCheck } from "@/state/CheckProvider";
 import { useProfile } from "@/state/ProfileProvider";
 import { BackIcon, Button, CircleButton, Dialog, Disclaimer, FutureMeRobot, ItemTile, Mark, Ripple, StatCard, Sticker, useToast, Verdict } from "@/ui";
@@ -12,7 +14,6 @@ import { BackIcon, Button, CircleButton, Dialog, Disclaimer, FutureMeRobot, Item
 /**
  * 05 Reality card: Healthy, Not healthy and Pocket empty (N7). Every number comes from `/api/check`;
  * the paragraph comes from the AI service. "Add to wishlist" asks first when it is already there (N10).
- * TODO(phase 7): "Ask Future Me" opens the chat seeded with this product and verdict.
  * TODO(design): where the Future Me entry sits on this card is not in the Figma frames.
  */
 export function Reality() {
@@ -21,6 +22,7 @@ export function Reality() {
   const { t, lang } = useI18n();
   const { profile } = useProfile();
   const check = useCheck();
+  const { openChat, queueNudge } = useFutureMe();
   const { reality, product, price } = check;
   const [reflection, setReflection] = useState<string | null>(null);
   const [dupOpen, setDupOpen] = useState(false);
@@ -86,6 +88,18 @@ export function Reality() {
       bar: 100,
     },
   }[status];
+
+  const checked: CheckedProduct = {
+    name: product.name,
+    emoji: product.emoji,
+    price,
+    pocketName: pocket,
+    status,
+    remainingAfter: reality.remainingAfter,
+    overBy: reality.overBy,
+    displayWorkHours: reality.displayWorkHours,
+    daysUntilRefill: reality.daysUntilRefill,
+  };
 
   const leave = (to: string) => {
     leaving.current = true;
@@ -167,7 +181,15 @@ export function Reality() {
         />
 
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <Button variant="secondary" disabled={saving} onClick={() => leave("/home")}>
+          <Button
+            variant="secondary"
+            disabled={saving}
+            onClick={() => {
+              // A product that did not fit gets a Future Me nudge on Home.
+              if (status !== "healthy") queueNudge(checked);
+              leave("/home");
+            }}
+          >
             {t("reality.notNow")}
           </Button>
           <Button disabled={saving} onClick={() => (reality.duplicateOf ? setDupOpen(true) : void add())}>
@@ -177,7 +199,7 @@ export function Reality() {
 
         <button
           type="button"
-          onClick={() => toast({ message: "Future Me arrives in the next phase." })}
+          onClick={() => openChat(checked)}
           className="tt-body-strong mx-auto mt-4 inline-flex items-center gap-2 rounded-pill px-3 py-2 text-link"
         >
           <FutureMeRobot size={24} />

@@ -5,6 +5,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { formatMonthYear } from "@/lib/dates";
 import { formatMoney } from "@/lib/format";
 import { clearAppKeys } from "@/lib/storage";
+import { useFutureMe } from "@/features/futureMe/FutureMeProvider";
 import { useProfile } from "@/state/ProfileProvider";
 import {
   BookmarkIcon,
@@ -20,7 +21,6 @@ import {
   pocketColor,
   ProgressRing,
   Ripple,
-  useToast,
 } from "@/ui";
 
 const HOME_ITEMS = 4;
@@ -34,7 +34,7 @@ const HOME_ITEMS = 4;
  */
 export function Home() {
   const navigate = useNavigate();
-  const toast = useToast();
+  const { openChat } = useFutureMe();
   const { t, lang } = useI18n();
   const { state, profile, reload } = useProfile();
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -65,8 +65,6 @@ export function Home() {
       : roomy
         ? t(count === 1 ? "home.subRoomOne" : "home.subRoomMany", { pocket: roomy, count })
         : t(count === 1 ? "home.subWishlistOne" : "home.subWishlistMany", { count });
-
-  const soon = (what: string) => toast({ message: `${what} arrives in the next phase.` }); // TODO(phase 7): the Future Me chat
 
   return (
     <main className="flex flex-1 flex-col bg-page px-5 pt-[max(12px,env(safe-area-inset-top))] pb-[max(120px,env(safe-area-inset-bottom))]">
@@ -185,7 +183,7 @@ export function Home() {
         </div>
       )}
 
-      <FutureMeFab label={t("home.robot")} tooltip={t("home.tooltip")} onClick={() => soon("Future Me")} />
+      <FutureMeFab label={t("home.robot")} tooltip={t("home.tooltip")} onClick={() => openChat()} />
     </main>
   );
 }

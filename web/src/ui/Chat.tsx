@@ -3,16 +3,16 @@ import { cx } from "@/lib/cx";
 import { SparkleIcon } from "./icons";
 import { Mark } from "./Mark";
 
-type BubbleProps = { from: "user" | "model"; children: ReactNode; className?: string };
+type BubbleProps = { from: "user" | "model"; children: ReactNode; className?: string; /** Future Me bubbles: white with a shadow on a tinted screen, grey inside a white sheet. */ tone?: "page" | "surface" };
 
 /** Future Me bubbles: hug content, max width 280. Future Me on the left, the user on the right. */
-export function ChatBubble({ from, children, className }: BubbleProps) {
+export function ChatBubble({ from, children, className, tone = "page" }: BubbleProps) {
   return (
     <div className={cx("flex", from === "user" ? "justify-end" : "justify-start")}>
       <div
         className={cx(
           "tt-body max-w-[280px] rounded-[20px] px-3.5 py-2.5",
-          from === "user" ? "bg-action text-white" : "bg-page text-ink shadow-sm",
+          from === "user" ? "bg-action text-white" : tone === "surface" ? "bg-surface text-ink" : "bg-page text-ink shadow-sm",
           className,
         )}
       >
