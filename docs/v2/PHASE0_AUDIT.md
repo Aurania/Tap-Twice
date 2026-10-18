@@ -86,3 +86,11 @@ Source of truth for v2: `tap-twice-v2-handoff.md` + decisions in the chat (below
 - **Design TODOs found:** under-100% allocation state, removing a custom pocket, custom pocket name rules and colour, "no work day selected", goal screen redesign (#2), Welcome 1–3 copy still talks about carts and rupiah.
 - **Home is a minimal placeholder** (goal and pockets from `/api/summary`, plus a dev-only reset button) until phase 5.
 - **Run it locally:** start the API (`cd api && npm run dev`, needs `gcloud auth application-default login`; it uses the project's Firestore) and put `VITE_API_URL=http://localhost:8080` in `web/.env.development.local` (git-ignored) before `npm run dev` in `web/`. The deployed Cloud Run API is still v1 until it is redeployed.
+
+### Phase 4 follow-up checks (browser, local API)
+
+- **Currency sheet:** lists all 8, searches by code, currency name and country ("japan" finds JPY), shows "No currency found", picking IDR switches the prefix to "Rp" and clears the amounts.
+- **ID language:** all four steps translated; Indonesian separators ("5.600.000", decimals with a comma); N1 reads "Pengeluaran Rp 600.000 lebih tinggi dari penghasilan…".
+- **Custom pocket sheet:** empty name and duplicates (case-insensitive) are blocked with a message; added pocket starts at 0%; "Remove" works.
+- **Bugs found and fixed:** the big "Left to allocate" number was clipped for long amounts (now shrinks by length); switching language after typing amounts misread them ("3,200" as 3.2), now converted on language change.
+- **Not changed:** the "no work day" hint is plain text (design TODO).
