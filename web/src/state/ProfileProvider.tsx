@@ -1,19 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { api, type Profile } from "@/api";
+import { api, type ProfileV2 } from "@/api";
 import { ensureUser } from "@/auth/firebase";
 import { useI18n } from "@/i18n/I18nProvider";
 
 type ProfileState =
   | { status: "loading" }
   | { status: "error" }
-  | { status: "ready"; profile: Profile | null };
+  | { status: "ready"; profile: ProfileV2 | null };
 
 type ProfileContextValue = {
   state: ProfileState;
   /** Profile once loaded; null while loading or when the user has none yet. */
-  profile: Profile | null;
+  profile: ProfileV2 | null;
   reload: () => void;
-  save: (profile: Profile) => Promise<Profile>;
+  save: (profile: ProfileV2) => Promise<ProfileV2>;
 };
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
@@ -37,7 +37,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   useEffect(load, [load]);
 
-  const save = useCallback(async (profile: Profile) => {
+  const save = useCallback(async (profile: ProfileV2) => {
     const res = await api.putProfile(profile);
     setState({ status: "ready", profile: res.profile });
     return res.profile;

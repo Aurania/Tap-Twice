@@ -72,7 +72,17 @@ Source of truth for v2: `tap-twice-v2-handoff.md` + decisions in the chat (below
 
 ### Open items to decide
 
-1. **How does a purchase get recorded?** v2 removed "Buy it", but pocket remaining depends on actual purchases (this is the only way to get the $52 "Not healthy" case). The endpoint exists (`POST /api/purchases`). Proposal: completing the wishlist item's "How are you paying?" flow (05e, pay in full or PayLater) records the purchase. **Needs your confirmation before phase 8.**
+1. **How a purchase is recorded: DECIDED.** Completing the wishlist item's "How are you paying?" flow (05e) records it and removes the item. Pay in full reduces the pocket by the full price in that month. **PayLater reduces the pocket by the monthly installment in each month of the tenor** (option A). The server will store an installment plan (monthly amount, tenor, start month) and sum the active installments per month. `POST /api/purchases` and `pocketRemaining` get this in phase 8; until then purchases are single-month amounts.
 2. **"This month" timezone** is UTC for now (v1 used Jakarta). Per-profile timezone is not in the handoff.
 3. **PayLater rounding:** `paylaterCost` still defaults to whole units; phase 8 passes the currency's decimals.
 4. **Pocket empty card** color/layout (`2026:2979`) is checked in phase 6; red until then.
+
+## Phase 4 log: onboarding
+
+- **Screens** (all checked against Figma `2026:1547/1584/1624/1738/1799/1864/1901`): Money & income (currency sheet, N1), Work time (day chips, hours picker), Pocket allocation (sliders, N2), Goal (v1 layout, month/year picker). Saving sends the whole profile to `PUT /api/profile`.
+- **Server numbers on the sliders:** `POST /api/preview/budget` returns leftover, per-pocket budgets, the 100% check and the "over by" amount. The web only adds up percentages for the ring. `useBudgetPreview` debounces it.
+- **Removed from the web (restore from git history when needed):** v1 check flow, PayLater screens and `lib/paylater.ts`, Future Me, Saved, Settings, `CartCheckProvider`, `lib/money.ts`, `lib/upload.ts`. PayLater files come back in phase 8.
+- **Header progress** has 4 steps (Figma shows 3 segments for the first three screens; the goal screen was not redesigned).
+- **Design TODOs found:** under-100% allocation state, removing a custom pocket, custom pocket name rules and colour, "no work day selected", goal screen redesign (#2), Welcome 1–3 copy still talks about carts and rupiah.
+- **Home is a minimal placeholder** (goal and pockets from `/api/summary`, plus a dev-only reset button) until phase 5.
+- **Run it locally:** start the API (`cd api && npm run dev`, needs `gcloud auth application-default login`; it uses the project's Firestore) and put `VITE_API_URL=http://localhost:8080` in `web/.env.development.local` (git-ignored) before `npm run dev` in `web/`. The deployed Cloud Run API is still v1 until it is redeployed.

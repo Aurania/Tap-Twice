@@ -90,3 +90,10 @@ export const CheckRequestSchema = z.object({
   pocketId: z.string().trim().min(1).max(40),
 });
 export type CheckRequest = z.infer<typeof CheckRequestSchema>;
+
+/** Onboarding sliders: numbers before a profile exists. */
+export const BudgetPreviewRequestSchema = z.object({
+  monthlyIncome: z.number().finite().min(0),
+  monthlyExpenses: money,
+  pockets: z.array(z.object({ id: z.string().trim().min(1).max(40), allocationPct: z.number().finite().min(0).max(100) })).max(12),
+});

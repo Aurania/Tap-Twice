@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ProfileSchema, type Profile } from "./schemas.js";
 import { seedPockets, seedProduct, seedProfile, seedScenarios, seedWishlist } from "./seed.js";
-import { buildReality, buildSummary, type StoredWishlistItem } from "./summary.js";
+import { buildBudgetPreview, buildReality, buildSummary, type StoredWishlistItem } from "./summary.js";
 
 const profile: Profile = {
   ...seedProfile,
@@ -112,5 +112,32 @@ describe("buildReality (the New Balance shoes, $89.90 in Fashion)", () => {
   });
   it("is null for an unknown pocket", () => {
     expect(buildReality(profile, wishlist, [], { ...check, pocketId: "nope" })).toBeNull();
+  });
+});
+
+describe("buildBudgetPreview (onboarding sliders)", () => {
+  const pockets = (pcts: number[]) => pcts.map((allocationPct, i) => ({ id: `p${i}`, allocationPct }));
+
+  it("100%: $1,100 left, budgets $330 / $220 / $275 / $275", () => {
+    const p = buildBudgetPreview(3200, 2100, pockets([30, 20, 25, 25]));
+    expect(p).toMatchObject({ leftover: 1100, hasRoom: true, expensesOverBy: 0, allocationTotal: 100, valid: true, overAllocatedBy: 0, overAllocatedAmount: 0 });
+    expect(p.budgets.map((b) => b.budget)).toEqual([330, 220, 275, 275]);
+  });
+  it("N2 (Figma): 110% is over-allocated by $110 and Travel shows $385", () => {
+    const p = buildBudgetPreview(3200, 2100, pockets([30, 20, 25, 35]));
+    expect(p).toMatchObject({ allocationTotal: 110, valid: false, overAllocatedBy: 10, overAllocatedAmount: 110 });
+    expect(p.budgets[3]?.budget).toBe(385);
+  });
+  it("under 100% is negative", () => {
+    const p = buildBudgetPreview(3200, 2100, pockets([30, 20, 25]));
+    expect(p).toMatchObject({ valid: false, overAllocatedBy: -25, overAllocatedAmount: -275 });
+  });
+  it("N1 (Figma): $2,600 expenses on $2,000 income is $600 over", () => {
+    const p = buildBudgetPreview(2000, 2600, pockets([30, 20, 25, 25]));
+    expect(p).toMatchObject({ hasRoom: false, expensesOverBy: 600, leftover: -600 });
+    expect(p.budgets.every((b) => b.budget === 0)).toBe(true);
+  });
+  it("expenses equal to income has no room but is not 'over'", () => {
+    expect(buildBudgetPreview(3200, 3200, pockets([100]))).toMatchObject({ hasRoom: false, expensesOverBy: 0 });
   });
 });

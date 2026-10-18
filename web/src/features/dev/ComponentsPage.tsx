@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
-import { api } from "@/api";
+import { api, health as fetchHealth } from "@/api";
 import { ensureUser } from "@/auth/firebase";
 import { useI18n } from "@/i18n/I18nProvider";
 import { getMockScenario, MOCK_SCENARIOS, setMockScenario, type MockScenario } from "@/services/ai";
@@ -63,8 +63,7 @@ export function ComponentsPage() {
   const [profile, setProfile] = useState<Check>({ state: "pending" });
 
   useEffect(() => {
-    api
-      .health()
+    fetchHealth()
       .then((h) => setHealth({ state: "ok", detail: `ok · ${h.model}` }))
       .catch((e: unknown) => setHealth({ state: "fail", detail: String(e) }));
     ensureUser()

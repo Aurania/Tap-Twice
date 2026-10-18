@@ -1,7 +1,6 @@
 /** localStorage keys this app owns. "Reset everything" clears all `tt.*` keys (BACKEND_GAPS.md #11). */
 export const KEYS = {
   lang: "tt.lang", // UI language before onboarding (gaps #12)
-  avoidInterest: "tt.avoidInterest", // "Avoid interest" answer (gaps #3)
 } as const;
 
 type Key = (typeof KEYS)[keyof typeof KEYS];

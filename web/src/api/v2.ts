@@ -2,10 +2,8 @@
  * v2 API: profile with pockets, wishlist per pocket, purchases, and the server-computed numbers
  * (summary for Home/Wishlist, check for the Reality card). Mirrors api/src/schemas.ts and summary.ts.
  * The frontend only displays these numbers (web/CLAUDE.md rule 1).
- *
- * This sits beside the v1 `api/` module until the v1 screens are replaced (phases 4–7); then it takes over `index.ts`.
  */
-import { request } from "./client";
+import { request, send } from "./client";
 import type { Language } from "./types";
 
 export const CURRENCIES = ["USD", "IDR", "INR", "SGD", "EUR", "GBP", "JPY", "AUD"] as const;
@@ -76,6 +74,19 @@ export type Reality = {
   duplicateOf: string | null;
 };
 
+export type BudgetPreviewInput = { monthlyIncome: number; monthlyExpenses: number; pockets: { id: string; allocationPct: number }[] };
+
+export type BudgetPreview = {
+  leftover: number;
+  hasRoom: boolean;
+  expensesOverBy: number;
+  allocationTotal: number;
+  valid: boolean;
+  overAllocatedBy: number;
+  overAllocatedAmount: number;
+  budgets: { id: string; budget: number }[];
+};
+
 export type CheckInput = { name: string; price: number; pocketId: string };
 export type NewWishlistItemV2 = { name: string; price: number; pocketId: string };
 export type NewPurchase = { name: string; amount: number; pocketId: string };
@@ -85,6 +96,9 @@ export const apiV2 = {
   getProfile: () => request<{ profile: ProfileV2 | null }>("GET", "/api/profile"),
   putProfile: (profile: ProfileV2) => request<{ profile: ProfileV2 }>("PUT", "/api/profile", profile),
   deleteMe: () => request<{ ok: true }>("DELETE", "/api/me"),
+
+  /** Onboarding sliders: money amounts for a draft, before any profile exists. */
+  previewBudget: (input: BudgetPreviewInput, signal?: AbortSignal) => send("POST", "/api/preview/budget", input, signal).then((r) => r.json() as Promise<{ preview: BudgetPreview }>),
 
   getSummary: () => request<{ summary: Summary }>("GET", "/api/summary"),
   check: (input: CheckInput) => request<{ reality: Reality }>("POST", "/api/check", input),

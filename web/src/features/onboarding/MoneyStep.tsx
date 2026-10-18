@@ -1,32 +1,40 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useI18n } from "@/i18n/I18nProvider";
-import { parseRupiah } from "@/lib/money";
-import { Button, ChoiceChip, MoneyField, TextField } from "@/ui";
-import { hoursPerWeek, OnboardingHeader, OnboardingScreen, useEditMode, useOnboardingDraft, type WorkPreset } from "./OnboardingLayout";
+import { parseAmount } from "@/lib/amount";
+import { formatMoney } from "@/lib/format";
+import { AmountField, Button, TextField } from "@/ui";
+import { ChevronDown } from "lucide-react";
+import { CurrencySheet, currencyFlag, currencyName } from "./CurrencySheet";
+import { OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./OnboardingLayout";
+import { useBudgetPreview } from "./useBudgetPreview";
 
-const PRESETS: Record<Exclude<WorkPreset, "varies">, { hoursPerDay: string; daysPerWeek: string }> = {
-  "9to5": { hoursPerDay: "8", daysPerWeek: "5" },
-  shifts: { hoursPerDay: "8", daysPerWeek: "6" },
-};
-
-/** 01a Onboarding · Money. Currency fixed to IDR and income required (gaps #1, #3). */
+/** 01a-1 Money & income. Currency (default USD), income and expenses are required. N1 comes from the server's numbers. */
 export function MoneyStep() {
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { draft, update } = useOnboardingDraft();
-  const edit = useEditMode();
+  const [currencyOpen, setCurrencyOpen] = useState(false);
 
-  const income = parseRupiah(draft.income);
-  const weekly = hoursPerWeek(draft.hoursPerDay, draft.daysPerWeek);
-  const hoursValid = weekly >= 1 && weekly <= 120;
-  const canContinue = income !== null && income > 0 && hoursValid;
+  const income = parseAmount(draft.income, draft.currency, lang);
+  const expenses = parseAmount(draft.expenses, draft.currency, lang);
+  const filled = income !== null && income > 0 && expenses !== null;
 
-  const pickPreset = (preset: WorkPreset) => update(preset === "varies" ? { preset } : { preset, ...PRESETS[preset] });
-  const digits = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
+  const { status, preview } = useBudgetPreview(filled ? { monthlyIncome: income, monthlyExpenses: expenses, pockets: [] } : null);
+  // Only trust the preview that matches what is on screen.
+  const checked = filled && status === "ready" && preview !== null;
+  const noRoom = checked && !preview.hasRoom;
+  const canContinue = checked && preview.hasRoom;
+
+  const error = noRoom
+    ? preview.expensesOverBy > 0
+      ? t("onboarding.expensesOver", { amount: formatMoney(preview.expensesOverBy, draft.currency, lang) })
+      : t("onboarding.expensesEqual")
+    : null;
 
   return (
     <OnboardingScreen>
-      <OnboardingHeader step={1} onBack={edit.editing ? edit.back : () => navigate("/welcome/4")} showLanguage={!edit.editing} />
+      <OnboardingHeader step={1} onBack={() => navigate("/welcome/4")} />
       <h1 className="tt-h1 mt-4">{t("onboarding.moneyTitle")}</h1>
       <p className="tt-body mt-2 text-ink-2">{t("onboarding.moneySub")}</p>
 
@@ -34,9 +42,7 @@ export function MoneyStep() {
         className="mt-6 flex flex-1 flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!canContinue) return;
-          if (edit.editing) void edit.saveEdit(draft);
-          else navigate("/onboarding/goal");
+          if (canContinue) navigate("/onboarding/work");
         }}
       >
         <TextField
@@ -50,60 +56,55 @@ export function MoneyStep() {
         />
 
         <div>
-          <p className="tt-small mb-1.5 text-ink-2">{t("onboarding.currency")}</p>
-          <p className="tt-body-lg flex h-[52px] items-center rounded-md border border-line bg-page px-4 text-ink">{t("onboarding.currencyValue")}</p>
+          <p className="tt-small mb-1.5 text-ink-2" id="currency-label">
+            {t("onboarding.currency")}
+          </p>
+          <button
+            type="button"
+            aria-labelledby="currency-label"
+            aria-haspopup="dialog"
+            onClick={() => setCurrencyOpen(true)}
+            className="tt-body-lg flex h-[52px] w-full items-center justify-between rounded-md border border-line bg-page px-4 text-left"
+          >
+            <span className="flex items-center gap-2">
+              <span aria-hidden>{currencyFlag(draft.currency)}</span>
+              {draft.currency} · {currencyName(draft.currency, lang)}
+            </span>
+            <ChevronDown aria-hidden className="size-5 text-ink" />
+          </button>
+          <p className="tt-small mt-1.5 text-ink-2">{t("onboarding.currencyHelp")}</p>
         </div>
 
-        <MoneyField
+        <AmountField
           label={t("onboarding.income")}
+          currency={draft.currency}
           value={draft.income}
           onChange={(income) => update({ income })}
           helper={t("onboarding.incomeHelp")}
           required
         />
-
-        <fieldset>
-          <legend className="tt-small mb-2 text-ink-2">{t("onboarding.work")}</legend>
-          <div className="flex flex-wrap gap-2">
-            <ChoiceChip selected={draft.preset === "9to5"} onClick={() => pickPreset("9to5")}>
-              {t("onboarding.preset95")}
-            </ChoiceChip>
-            <ChoiceChip selected={draft.preset === "shifts"} onClick={() => pickPreset("shifts")}>
-              {t("onboarding.presetShifts")}
-            </ChoiceChip>
-            <ChoiceChip selected={draft.preset === "varies"} onClick={() => pickPreset("varies")}>
-              {t("onboarding.presetVaries")}
-            </ChoiceChip>
-          </div>
-        </fieldset>
-
-        <div className="grid grid-cols-2 gap-2.5">
-          <TextField
-            label={t("onboarding.hoursPerDay")}
-            inputMode="numeric"
-            value={draft.hoursPerDay}
-            onChange={(v) => update({ hoursPerDay: digits(v, 2), preset: "varies" })}
-          />
-          <TextField
-            label={t("onboarding.daysPerWeek")}
-            inputMode="numeric"
-            value={draft.daysPerWeek}
-            onChange={(v) => update({ daysPerWeek: digits(v, 1), preset: "varies" })}
-          />
-        </div>
-        {!hoursValid && draft.hoursPerDay && draft.daysPerWeek && (
-          <p className="tt-small -mt-2 text-warn">{t("onboarding.hoursInvalid", { hours: weekly })}</p>
-        )}
-
-        {edit.error && (
+        <AmountField
+          label={t("onboarding.expenses")}
+          currency={draft.currency}
+          value={draft.expenses}
+          onChange={(expenses) => update({ expenses })}
+          helper={error ?? t("onboarding.expensesHelp")}
+          tone={error ? "danger" : "default"}
+          aria-invalid={error ? true : undefined}
+          required
+        />
+        {status === "error" && (
           <p role="alert" className="tt-small text-center text-warn">
-            {t("onboarding.saveError")}
+            {t("onboarding.previewError")}
           </p>
         )}
-        <Button type="submit" className="mt-auto" disabled={!canContinue || edit.saving}>
-          {edit.editing ? t("common.save") : t("common.next")}
+
+        <Button type="submit" className="mt-auto" disabled={!canContinue}>
+          {t("common.next")}
         </Button>
       </form>
+
+      <CurrencySheet open={currencyOpen} onClose={() => setCurrencyOpen(false)} value={draft.currency} onPick={(currency) => update({ currency, income: "", expenses: "" })} />
     </OnboardingScreen>
   );
 }

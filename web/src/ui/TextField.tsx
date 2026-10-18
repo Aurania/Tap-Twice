@@ -11,7 +11,7 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange"> &
   helper?: ReactNode;
   /** Leading text inside the field, e.g. "Rp". */
   prefix?: string;
-  tone?: "default" | "warning";
+  tone?: "default" | "warning" | "danger";
 };
 
 /** Labelled input, 52 px tall, radius 16. */
@@ -28,8 +28,9 @@ export function TextField({ label, value, onChange, showCounter, helper, prefix,
       <div
         className={cx(
           "flex h-[52px] items-center gap-2 rounded-md border px-4",
-          tone === "warning" ? "border-warn/40 bg-warning-bg" : "border-line bg-page",
-          "focus-within:border-action",
+          tone === "warning" && "border-warn/40 bg-warning-bg",
+          tone === "danger" && "border-danger bg-page",
+          tone === "default" && "border-line bg-page focus-within:border-action",
         )}
       >
         {prefix && <span className="tt-body-lg text-ink-2">{prefix}</span>}
@@ -49,7 +50,7 @@ export function TextField({ label, value, onChange, showCounter, helper, prefix,
         )}
       </div>
       {helper && (
-        <p id={helperId} className="tt-small mt-1.5 text-ink-2">
+        <p id={helperId} className={cx("tt-small mt-1.5", tone === "danger" ? "text-danger" : "text-ink-2")}>
           {helper}
         </p>
       )}

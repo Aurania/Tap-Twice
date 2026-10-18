@@ -5,9 +5,9 @@ import { logger } from "hono/logger";
 import type { z } from "zod";
 import { requireUser, type AuthEnv } from "./auth.js";
 import { config } from "./config.js";
-import { CheckRequestSchema, ProfileSchema, PurchaseSchema, WishlistItemSchema } from "./schemas.js";
+import { BudgetPreviewRequestSchema, CheckRequestSchema, ProfileSchema, PurchaseSchema, WishlistItemSchema } from "./schemas.js";
 import * as store from "./store.js";
-import { buildReality, buildSummary } from "./summary.js";
+import { buildBudgetPreview, buildReality, buildSummary } from "./summary.js";
 
 const app = new Hono<AuthEnv>();
 
@@ -43,6 +43,13 @@ app.put("/api/profile", async (c) => {
 app.delete("/api/me", async (c) => {
   await store.deleteAllUserData(c.get("uid"));
   return c.json({ ok: true });
+});
+
+// ---- Onboarding sliders (no profile needed) ----
+app.post("/api/preview/budget", async (c) => {
+  const req = await body(c.req.raw, BudgetPreviewRequestSchema);
+  if (!req) return c.json({ error: "invalid_preview" }, 400);
+  return c.json({ preview: buildBudgetPreview(req.monthlyIncome, req.monthlyExpenses, req.pockets) });
 });
 
 // ---- Wishlist ----
