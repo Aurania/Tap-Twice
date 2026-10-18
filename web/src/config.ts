@@ -1,4 +1,4 @@
-/** Runtime config from web/.env.local (see REPO_CONTEXT.md, "Frontend setup notes"). */
+/** Runtime config from web/.env.local. */
 
 function required(name: keyof ImportMetaEnv): string {
   const value = import.meta.env[name];

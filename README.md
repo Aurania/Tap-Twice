@@ -83,4 +83,4 @@ Deploying the API from this branch replaces the v1 routes, so deploy the web at 
 
 ## Older docs
 
-[`REPO_CONTEXT.md`](REPO_CONTEXT.md) and [`docs/frontend/`](docs/frontend) describe v1 (cart screenshots, rupiah only, joy budget) and are kept for history.
+[`docs/frontend/`](docs/frontend) describes v1 (cart screenshots, rupiah only, joy budget) and is kept for history.

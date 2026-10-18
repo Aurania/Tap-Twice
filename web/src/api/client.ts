@@ -16,7 +16,7 @@ export class ApiError extends Error {
 
 let onNoProfile: (() => void) | null = null;
 
-/** The app registers a redirect to /welcome for `409 no_profile` (BACKEND_GAPS.md, REPO_CONTEXT.md edge cases). */
+/** The app registers a redirect to /welcome for `409 no_profile` (`api/src/schemas.ts`). */
 export function setNoProfileHandler(handler: (() => void) | null): void {
   onNoProfile = handler;
 }
