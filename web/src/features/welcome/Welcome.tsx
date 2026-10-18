@@ -2,9 +2,9 @@ import { useRef, type ReactNode, type TouchEvent } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
 import { useI18n } from "@/i18n/I18nProvider";
 import { cx } from "@/lib/cx";
-import { Button, ChatBubble, LanguageSwitch, Mark, Ripple, SparkleIcon, Sticker } from "@/ui";
+import { Button, ChatBubble, FutureMeRobot, LanguageSwitch, Mark, Ripple, Sticker } from "@/ui";
 
-/** W1–W4 Welcome (first time only). Swipe or Next; Skip jumps to W4; Get started → onboarding. */
+/** W1–W4 Welcome (first time only). Copy is v2 (single product, sample $89.90 = 5 hours, fits Fashion); Figma still shows the v1 cart copy. Swipe or Next; Skip jumps to W4; Get started → onboarding. */
 export function Welcome() {
   const { step } = useParams();
   const n = Number(step);
@@ -116,19 +116,19 @@ function W2({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
       <div aria-hidden className="relative mt-2 h-[360px] overflow-hidden rounded-sheet bg-surface">
         <Ripple size={300} rings={3} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-line" />
         <div className="absolute top-[64px] left-[38px] w-[186px] rotate-[4deg] rounded-md bg-page p-4 shadow-md">
-          <p className="tt-body-strong">{t("welcome.w2Cart")}</p>
+          <p className="tt-body-strong">{t("welcome.w2Item")}</p>
           <div className="mt-3 space-y-2">
             <span className="block h-2.5 w-[150px] rounded-pill bg-surface" />
             <span className="block h-2.5 w-[118px] rounded-pill bg-surface" />
             <span className="block h-2.5 w-[90px] rounded-pill bg-surface" />
           </div>
-          <p className="tt-body-strong mt-4">{t("welcome.w2Total")} Rp 1.513.000</p>
+          <p className="tt-body-strong mt-4">{t("welcome.w2Price")}</p>
         </div>
         <span className="tt-body-strong absolute top-[196px] right-[44px] -rotate-[4deg] rounded-pill bg-action px-4 py-2 text-white shadow-md">
           {t("welcome.w2Hours")}
         </span>
         <Sticker rotate={3} className="absolute top-[284px] right-[40px]">
-          {t("welcome.w2Days")}
+          {t("welcome.w2Fit")}
         </Sticker>
       </div>
       <h1 className="tt-h1 mt-8 whitespace-pre-line">{t("welcome.w2Title")}</h1>
@@ -154,9 +154,7 @@ function W3({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
       <div aria-hidden className="relative h-[360px]">
         <span className="absolute top-[100px] left-[52px] inline-flex size-[74px] items-center justify-center rounded-pill bg-action">
           <Mark size={34} tone="white" />
-          <span className="absolute -right-1 -bottom-1 inline-flex size-[30px] items-center justify-center rounded-pill bg-highlight text-ink ring-2 ring-soft">
-            <SparkleIcon className="size-4" strokeWidth={2.5} />
-          </span>
+          <FutureMeRobot size={30} className="absolute -right-2 -bottom-2" />
         </span>
         <div className="absolute top-[60px] right-0 w-[230px]">
           <ChatBubble from="model">{t("welcome.w3Bubble1")}</ChatBubble>
