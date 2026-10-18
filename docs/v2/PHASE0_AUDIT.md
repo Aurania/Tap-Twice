@@ -94,3 +94,8 @@ Source of truth for v2: `tap-twice-v2-handoff.md` + decisions in the chat (below
 - **Custom pocket sheet:** empty name and duplicates (case-insensitive) are blocked with a message; added pocket starts at 0%; "Remove" works.
 - **Bugs found and fixed:** the big "Left to allocate" number was clipped for long amounts (now shrinks by length); switching language after typing amounts misread them ("3,200" as 3.2), now converted on language change.
 - **Not changed:** the "no work day" hint is plain text (design TODO).
+
+### Welcome 1–3 (checked against Figma `2026:1434/1464/1501`)
+
+- Figma's final-flow Welcome screens are still the v1 screens with only the robot badge on Welcome 3 and a $ sample price; the cart/paylater copy is still in the frames. **The v2 copy here is mine, not from Figma** (EN and ID): sample product $89.90 running shoes = 5 hours, fits Fashion, matching the rest of the app. Welcome 3 uses the vector robot (30px) instead of the sparkle badge. Welcome 4 ("Your money. Your call.") is not in the v2 flow list; kept, with "Your photos are never stored".
+- The Future Me chat avatar in `ui/Chat.tsx` still uses the sparkle badge; it becomes the robot in phase 7.
