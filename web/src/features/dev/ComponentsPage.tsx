@@ -295,9 +295,33 @@ export function ComponentsPage() {
           <BagIcon /> <BookmarkIcon /> <SparkleIcon /> <WalletIcon /> <CalendarIcon /> <CameraIcon /> <ImageIcon /> <SettingsIcon />
         </div>
       </Section>
+      <Section title="v2 color tokens">
+        <ul className="grid grid-cols-2 gap-2">
+          {V2_SWATCHES.map((s) => (
+            <li key={s.name} className="flex items-center gap-2 rounded-md bg-surface px-3 py-2">
+              <span aria-hidden className={`size-6 shrink-0 rounded-pill border border-line ${s.swatch}`} />
+              <span className="tt-caption">{s.name}</span>
+            </li>
+          ))}
+        </ul>
+      </Section>
     </main>
   );
 }
+
+/** Full class names so Tailwind can see them. */
+const V2_SWATCHES = [
+  { name: "pocket-fashion", swatch: "bg-pocket-fashion" },
+  { name: "pocket-gadgets", swatch: "bg-pocket-gadgets" },
+  { name: "pocket-entertainment", swatch: "bg-pocket-entertainment" },
+  { name: "pocket-travel", swatch: "bg-pocket-travel" },
+  { name: "robot-body", swatch: "bg-robot-body" },
+  { name: "robot-screen", swatch: "bg-robot-screen" },
+  { name: "success", swatch: "bg-success" },
+  { name: "success-tint", swatch: "bg-success-tint" },
+  { name: "danger", swatch: "bg-danger" },
+  { name: "danger-tint", swatch: "bg-danger-tint" },
+] as const;
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
