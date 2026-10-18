@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
-import { CheckIcon, CloseIcon } from "./icons";
+import { CheckIcon } from "./icons";
 
 export type VerdictStatus = "healthy" | "not_healthy" | "pocket_empty";
 
 const TONE: Record<VerdictStatus, { card: string; badge: string; bar: string }> = {
   healthy: { card: "bg-success-tint", badge: "bg-success", bar: "bg-success" },
   not_healthy: { card: "bg-danger-tint", badge: "bg-danger", bar: "bg-danger" },
-  // TODO(design): the Pocket empty variant (Figma 2026:2979) is checked in phase 6; red until then.
+  // Pocket empty (Figma 2026:2979) looks like Not healthy: red card, "!" badge, full bar.
   pocket_empty: { card: "bg-danger-tint", badge: "bg-danger", bar: "bg-danger" },
 };
 
@@ -29,12 +29,12 @@ type Props = {
 /** Pocket health card on the Reality card (Figma 05 · Healthy): tinted card, status badge, label row, status-colored bar. */
 export function Verdict({ status, title, subtitle, barLabel, barValue, barPct, className }: Props) {
   const tone = TONE[status];
-  const Icon = status === "healthy" ? CheckIcon : CloseIcon;
+
   return (
     <div className={cx("rounded-card p-4", tone.card, className)}>
       <div className="flex items-center gap-3">
         <span aria-hidden className={cx("inline-flex size-8 shrink-0 items-center justify-center rounded-pill text-white", tone.badge)}>
-          <Icon className="size-4" strokeWidth={3} />
+          {status === "healthy" ? <CheckIcon className="size-4" strokeWidth={3} /> : <span className="tt-body-lg leading-none">!</span>}
         </span>
         <div className="min-w-0">
           <p className="tt-body-lg text-ink">{title}</p>

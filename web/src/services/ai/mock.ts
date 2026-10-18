@@ -8,6 +8,7 @@ import {
   type FutureMeEvent,
   type IdentifiedProduct,
   type PocketOption,
+  type ReflectContext,
   type PriceReading,
   type ProductInput,
 } from "./types";
@@ -15,10 +16,11 @@ import {
 /**
  * What the mock should do. "ok" is the happy path; every other value triggers one negative case so
  * each state can be reached in the real app (set it from /dev/components or with setMockScenario).
+ * "camera_denied" is not an AI failure: the Snap screen reads it to show N3 without changing browser permissions.
  */
-export type MockScenario = "ok" | "not_a_product" | "no_price" | "offline" | "unreachable";
+export type MockScenario = "ok" | "not_a_product" | "no_price" | "offline" | "unreachable" | "camera_denied";
 
-export const MOCK_SCENARIOS: readonly MockScenario[] = ["ok", "not_a_product", "no_price", "offline", "unreachable"];
+export const MOCK_SCENARIOS: readonly MockScenario[] = ["ok", "not_a_product", "no_price", "offline", "unreachable", "camera_denied"];
 
 const STORAGE_KEY = "tt.ai.mock";
 let scenario: MockScenario = readStored();
@@ -104,6 +106,16 @@ export class MockAiService implements AiService {
     if (scenario === "offline") throw new AiError("offline");
     if (scenario === "no_price") return null;
     return { price: SAMPLE.price, currency: "USD" };
+  }
+
+  async reflect(c: ReflectContext, signal?: AbortSignal): Promise<string | null> {
+    await this.wait(400, signal);
+    if (scenario === "offline" || scenario === "unreachable") return null;
+    const m = (n: number) => formatMoney(n, c.currency, "en");
+    const refill = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${c.refillDate}T00:00:00Z`));
+    if (c.status === "healthy") return `Solid pick. ${c.pocketName} still has ${m(c.remainingAfter)} after this, so it fits your month. Still feeling it?`;
+    if (c.status === "not_healthy") return `${c.pocketName} only has ${m(c.remaining)} left, so this goes ${m(c.overBy)} over. Wait ${c.daysUntilRefill} days for the refill?`;
+    return `Your ${c.pocketName} pocket is at ${m(0)} until ${refill}. This would have to come out of another pocket. Wait, or add it to your wishlist?`;
   }
 
   async *futureMeChat(context: FutureMeContext, messages: ChatTurn[], signal?: AbortSignal): AsyncGenerator<FutureMeEvent> {

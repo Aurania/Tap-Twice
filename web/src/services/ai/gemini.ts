@@ -1,4 +1,4 @@
-import type { AiService, ChatTurn, FutureMeContext, FutureMeEvent, IdentifiedProduct, PocketOption, PriceReading, ProductInput } from "./types";
+import type { AiService, ChatTurn, ReflectContext, FutureMeContext, FutureMeEvent, IdentifiedProduct, PocketOption, PriceReading, ProductInput } from "./types";
 
 /**
  * The real provider (Gemini on Vertex AI, through our API). Not wired yet.
@@ -11,6 +11,10 @@ export class GeminiAiService implements AiService {
   }
 
   readPrice(_input: ProductInput, _signal?: AbortSignal): Promise<PriceReading | null> {
+    return Promise.reject(notWired());
+  }
+
+  reflect(_context: ReflectContext, _signal?: AbortSignal): Promise<string | null> {
     return Promise.reject(notWired());
   }
 

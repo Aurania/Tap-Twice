@@ -4,6 +4,8 @@ import { createPortal } from "react-dom";
 type Props = {
   open: boolean;
   onClose: () => void;
+  /** Optional picture above the title (an item tile, an icon). */
+  art?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   /** Buttons, primary first. */
@@ -11,7 +13,7 @@ type Props = {
 };
 
 /** Centered confirm dialog (for example "Already on your wishlist"). Escape and the scrim close it. */
-export function Dialog({ open, onClose, title, description, actions }: Props) {
+export function Dialog({ open, onClose, art, title, description, actions }: Props) {
   const titleId = useId();
   const descId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -44,11 +46,12 @@ export function Dialog({ open, onClose, title, description, actions }: Props) {
         tabIndex={-1}
         className="relative w-full max-w-[350px] rounded-card bg-page p-5 text-center shadow-lg outline-none"
       >
-        <h2 id={titleId} className="tt-h2 text-ink">
+        {art && <div className="mb-3 flex justify-center">{art}</div>}
+        <h2 id={titleId} className="tt-body-lg text-ink" style={{ fontSize: 18, fontWeight: 700 }}>
           {title}
         </h2>
         {description && (
-          <p id={descId} className="tt-body mt-2 text-ink-2">
+          <p id={descId} className="tt-small mt-2 text-ink-2">
             {description}
           </p>
         )}

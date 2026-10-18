@@ -37,6 +37,23 @@ export type FutureMeContext = {
   };
 };
 
+/** What the Reality card paragraph may mention. All numbers come from the server (`/api/check`). */
+export type ReflectContext = {
+  currency: Currency;
+  productName: string;
+  pocketName: string;
+  status: RealityStatus;
+  price: number;
+  /** What was left in the pocket before this purchase. */
+  remaining: number;
+  remainingAfter: number;
+  overBy: number;
+  displayWorkHours: number;
+  daysUntilRefill: number;
+  /** "YYYY-MM-DD" */
+  refillDate: string;
+};
+
 export type ChatTurn = { role: "user" | "model"; text: string };
 
 /** Same shape as the SSE events the real API will stream. */
@@ -79,6 +96,12 @@ export interface AiService {
    * Throws AiError("offline").
    */
   readPrice(input: ProductInput, signal?: AbortSignal): Promise<PriceReading | null>;
+
+  /**
+   * Two warm sentences for the Reality card ("Great shoes, wrong week…"). Resolves null when it cannot write one;
+   * the card then shows without it. Throws nothing the UI needs to handle.
+   */
+  reflect(context: ReflectContext, signal?: AbortSignal): Promise<string | null>;
 
   /**
    * Pocket-aware reflection chat. First call: empty `messages`; the service opens the conversation.

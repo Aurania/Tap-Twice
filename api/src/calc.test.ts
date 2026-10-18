@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   allocationTotal,
+  daysUntilRefill,
+  nextRefill,
   displayWorkHours,
   goalProgressPct,
   goalTone,
@@ -10,6 +12,7 @@ import {
   itemPocketPct,
   leftover,
   overAllocatedBy,
+  overBy,
   pctOfIncome,
   pocketBudget,
   pocketRemaining,
@@ -138,9 +141,13 @@ describe("remainingAfterPct and remainingAfter", () => {
     // 200 left of a 330 budget; after a 50 buy 150 is left = 45% of the budget.
     expect(remainingAfterPct(50, 200, 330)).toBe(45);
   });
-  it("is 0 when the price is more than what is left", () => {
+  it("is 0% and goes negative in money when the price is more than what is left (Figma −$37.90)", () => {
     expect(remainingAfterPct(89.9, 52, 330)).toBe(0);
-    expect(remainingAfter(89.9, 52)).toBe(0);
+    expect(remainingAfter(89.9, 52)).toBe(-37.9);
+  });
+  it("overBy is how far a price goes over, else 0", () => {
+    expect(overBy(89.9, 52)).toBe(37.9);
+    expect(overBy(40, 52)).toBe(0);
   });
   it("is 0 when nothing was left and null without a budget", () => {
     expect(remainingAfterPct(89.9, 0, 330)).toBe(0);
@@ -209,5 +216,16 @@ describe("goal", () => {
   });
   it("handles a missing target", () => {
     expect(goalProgressPct(10, 0)).toBe(0);
+  });
+});
+
+describe("refill", () => {
+  it("is the first of next month, UTC", () => {
+    expect(nextRefill(new Date("2026-10-18T12:00:00Z")).toISOString()).toBe("2026-11-01T00:00:00.000Z");
+    expect(nextRefill(new Date("2026-12-31T23:00:00Z")).toISOString()).toBe("2027-01-01T00:00:00.000Z");
+  });
+  it("counts whole days up: Oct 18 noon → 14 (Figma 'Wait 14 days for the refill')", () => {
+    expect(daysUntilRefill(new Date("2026-10-18T12:00:00Z"))).toBe(14);
+    expect(daysUntilRefill(new Date("2026-10-31T23:00:00Z"))).toBe(1);
   });
 });
