@@ -31,6 +31,7 @@ export interface StoredWishlistItem {
   name: string;
   price: number;
   pocketId: string;
+  emoji?: string | null;
   createdAt: string | null;
 }
 
@@ -64,6 +65,11 @@ export interface Summary {
   leftover: number;
   goal: Profile["goal"] & { progressPct: number; tone: "danger" | "neutral" };
   pockets: PocketSummary[];
+  /**
+   * The pocket with the most left this month, for "Your Fashion pocket has room" on Home. Null when every pocket is empty.
+   * TODO(design): the handoff does not say how Home picks the pocket in that line; most room left is the assumption.
+   */
+  roomiestPocketId: string | null;
   wishlist: { total: number; pct: number | null; items: WishlistItemSummary[] };
 }
 
@@ -92,6 +98,13 @@ export function buildPockets(profile: Profile, wishlist: StoredWishlistItem[], p
   });
 }
 
+/** Most remaining wins; ties go to the first pocket in the user's order. */
+export function roomiestPocketId(pockets: PocketSummary[]): string | null {
+  let best: PocketSummary | null = null;
+  for (const p of pockets) if (p.remaining > 0 && (!best || p.remaining > best.remaining)) best = p;
+  return best?.id ?? null;
+}
+
 export function buildSummary(profile: Profile, wishlist: StoredWishlistItem[], purchases: StoredPurchase[]): Summary {
   const rate = rateFor(profile);
   const pockets = buildPockets(profile, wishlist, purchases);
@@ -103,6 +116,7 @@ export function buildSummary(profile: Profile, wishlist: StoredWishlistItem[], p
     leftover: leftover(profile.monthlyIncome, profile.monthlyExpenses),
     goal: { ...profile.goal, progressPct, tone: goalTone(progressPct) },
     pockets,
+    roomiestPocketId: roomiestPocketId(pockets),
     wishlist: {
       total: round2(wishlist.reduce((s, w) => s + w.price, 0)),
       pct: totalWishlistPct(

@@ -47,11 +47,11 @@ export function setMockScenario(next: MockScenario): void {
 const SAMPLE = { name: "New Balance Fresh Foam 680", detail: "Running shoes · Men's", price: 89.9 };
 
 /** Keyword → pocket, for links. Images always resolve to the sample shoes. */
-const POCKET_KEYWORDS: [RegExp, string, string][] = [
-  [/shoe|sneaker|jacket|denim|shirt|dress|bag/, "fashion", "Fashion item"],
-  [/earbud|headphone|phone|laptop|camera|watch|speaker/, "gadgets", "Gadget"],
-  [/game|switch|ticket|movie|concert|netflix/, "entertainment", "Entertainment"],
-  [/flight|hotel|trip|resort|airbnb/, "travel", "Trip"],
+const POCKET_KEYWORDS: [RegExp, string, string, string][] = [
+  [/shoe|sneaker|jacket|denim|shirt|dress|bag/, "fashion", "Fashion item", "👕"],
+  [/earbud|headphone|phone|laptop|camera|watch|speaker/, "gadgets", "Gadget", "🎧"],
+  [/game|switch|ticket|movie|concert|netflix/, "entertainment", "Entertainment", "🎮"],
+  [/flight|hotel|trip|resort|airbnb/, "travel", "Trip", "✈️"],
 ];
 
 const sleep = (ms: number, signal?: AbortSignal) =>
@@ -87,16 +87,16 @@ export class MockAiService implements AiService {
 
     if (input.kind === "link") {
       const url = input.url.toLowerCase();
-      for (const [pattern, pocketId, label] of POCKET_KEYWORDS) {
+      for (const [pattern, pocketId, label, emoji] of POCKET_KEYWORDS) {
         if (pattern.test(url) && pockets.some((p) => p.id === pocketId)) {
-          return { name: label, detail: null, pocketId, matchConfidencePct: 78 };
+          return { name: label, detail: null, emoji, pocketId, matchConfidencePct: 78 };
         }
       }
-      return { name: "Product from link", detail: null, pocketId: fallback.id, matchConfidencePct: 55 };
+      return { name: "Product from link", detail: null, emoji: "🛍️", pocketId: fallback.id, matchConfidencePct: 55 };
     }
 
     const fashion = pockets.find((p) => p.id === "fashion");
-    return { name: SAMPLE.name, detail: SAMPLE.detail, pocketId: (fashion ?? fallback).id, matchConfidencePct: fashion ? 92 : 55 };
+    return { name: SAMPLE.name, detail: SAMPLE.detail, emoji: "👟", pocketId: (fashion ?? fallback).id, matchConfidencePct: fashion ? 92 : 55 };
   }
 
   async readPrice(_input: ProductInput, signal?: AbortSignal): Promise<PriceReading | null> {

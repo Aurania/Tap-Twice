@@ -11,6 +11,8 @@ export type IdentifiedProduct = {
   name: string;
   /** "Running shoes · Men's" */
   detail: string | null;
+  /** Icon for the wishlist tile, "👟". */
+  emoji: string;
   /** The pocket the AI matched this product to. */
   pocketId: string;
   /** "AI matched · 92% sure" */

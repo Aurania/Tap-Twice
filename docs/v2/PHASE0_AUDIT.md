@@ -99,3 +99,15 @@ Source of truth for v2: `tap-twice-v2-handoff.md` + decisions in the chat (below
 
 - Figma's final-flow Welcome screens are still the v1 screens with only the robot badge on Welcome 3 and a $ sample price; the cart/paylater copy is still in the frames. **The v2 copy here is mine, not from Figma** (EN and ID): sample product $89.90 running shoes = 5 hours, fits Fashion, matching the rest of the app. Welcome 3 uses the vector robot (30px) instead of the sparkle badge. Welcome 4 ("Your money. Your call.") is not in the v2 flow list; kept, with "Your photos are never stored".
 - The Future Me chat avatar in `ui/Chat.tsx` still uses the sparkle badge; it becomes the robot in phase 7.
+
+## Phase 5 log: Home and wishlist
+
+- **Checked against Figma** `2017:1242` (full Home), `2026:1970`, `2026:2273` (Wishlist), `2026:2707` (N11), `2026:3129` (N9), `2026:3208` (robot tooltip). Home empty (N11) and the filled Home, the Wishlist and N9 match the frames.
+- **Server:** wishlist items carry an optional `emoji` (the design shows one per item; the identify step provides it); the summary has `roomiestPocketId` for "Your Fashion pocket has room".
+- **Assumptions to confirm (design TODOs):**
+  - "Has room" = the pocket with the most left this month; the subtitle for other states is my wording (only the empty and "has room" lines are designed).
+  - Figma's subtitle says "4 things" but its own sample wishlist has 5 items; the app counts the real items.
+  - Home lists the 4 most recent items; Wishlist lists each pocket oldest first (as Figma). Pockets without items are not shown on Wishlist.
+  - The floating robot's tooltip is always visible and covers part of the Check card (handoff §12 #4).
+- **Left out because the target screen is not designed:** the goal card's chevron destination (§12 #6, only drawn), "Edit" next to Your pockets, the Settings button. Wishlist rows are not tappable until phase 8; "Check a product" and the robot show a placeholder toast until phases 6 and 7.
+- **Dev only:** Home has "Add the 5 sample wishlist items" and "Reset my data" buttons (not in production builds).

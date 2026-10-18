@@ -372,7 +372,7 @@ function V2Components() {
       <Section title="v2 · Pocket cards and chips">
         <div className="grid grid-cols-2 gap-2">
           {pockets.map((p) => (
-            <PocketCard key={p.id} pocketId={p.id} name={p.name} pct={p.pct} detail="sample" />
+            <PocketCard key={p.id} pocketId={p.id} name={p.name} value="$330" pct={p.pct} caption={`${p.pct}% wishlisted`} />
           ))}
         </div>
         <div className="mt-3 flex flex-wrap gap-2">

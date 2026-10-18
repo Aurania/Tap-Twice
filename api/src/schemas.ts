@@ -72,6 +72,8 @@ export const WishlistItemSchema = z.object({
   name: z.string().trim().min(1).max(200),
   price: z.number().finite().positive(),
   pocketId: z.string().trim().min(1).max(40),
+  /** Icon for the wishlist tile ("👟"). Comes from product identification; the design shows one per item. */
+  emoji: z.string().trim().max(8).optional(),
 });
 export type WishlistItemInput = z.infer<typeof WishlistItemSchema>;
 

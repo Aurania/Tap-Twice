@@ -5,38 +5,40 @@ import { pocketColor } from "./pocket";
 type CardProps = {
   pocketId: string;
   name: string;
-  /** Wishlist as a percentage of the pocket budget. Null when the pocket has no budget. */
+  /** The big number, already formatted: the pocket's monthly budget ("$330"). */
+  value: ReactNode;
+  /** Wishlist as a percentage of the pocket budget; fills the bar. Null when the pocket has no budget. */
   pct: number | null;
-  /** Small line under the name, e.g. "$155.60 of $330". */
-  detail?: ReactNode;
+  /** Small line under the bar, already translated ("47% wishlisted"). */
+  caption: ReactNode;
   onClick?: () => void;
   className?: string;
 };
 
-/** Pocket tile: colored dot, name, % wishlisted and a bar (Home grid, Wishlist). */
-export function PocketCard({ pocketId, name, pct, detail, onClick, className }: CardProps) {
+/** Pocket tile on Home: colored dot, name, budget, a bar of how much is wishlisted, and a caption. */
+export function PocketCard({ pocketId, name, value, pct, caption, onClick, className }: CardProps) {
   const color = pocketColor(pocketId);
   const Tag = onClick ? "button" : "div";
   return (
     <Tag
       {...(onClick ? { type: "button" as const, onClick } : {})}
-      className={cx("flex w-full flex-col gap-2 rounded-card bg-surface p-4 text-left", onClick && "active:opacity-80", className)}
+      className={cx("flex w-full flex-col gap-1.5 rounded-card bg-surface p-4 text-left", onClick && "active:opacity-80", className)}
     >
       <span className="flex items-center gap-2">
         <span aria-hidden className="size-2.5 shrink-0 rounded-pill" style={{ background: color }} />
         <span className="tt-body-strong truncate text-ink">{name}</span>
       </span>
-      <span className="tt-number text-ink">{pct === null ? "–" : `${pct}%`}</span>
+      <span className="tt-number text-[24px] text-ink">{value}</span>
       <PocketBar pocketId={pocketId} pct={pct ?? 0} />
-      {detail && <span className="tt-caption text-ink-2">{detail}</span>}
+      <span className="tt-caption text-ink-2">{caption}</span>
     </Tag>
   );
 }
 
 /** Thin bar in the pocket color. Fill is clamped to 100%; the label carries the real number. */
-export function PocketBar({ pocketId, pct, className }: { pocketId: string; pct: number; className?: string }) {
+export function PocketBar({ pocketId, pct, className, track = "bg-page" }: { pocketId: string; pct: number; className?: string; track?: string }) {
   return (
-    <span aria-hidden className={cx("block h-1.5 w-full overflow-hidden rounded-pill bg-page", className)}>
+    <span aria-hidden className={cx("block h-1.5 w-full overflow-hidden rounded-pill", track, className)}>
       <span className="block h-full rounded-pill" style={{ width: `${Math.max(0, Math.min(100, pct))}%`, background: pocketColor(pocketId) }} />
     </span>
   );
