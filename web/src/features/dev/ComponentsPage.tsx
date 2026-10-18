@@ -15,18 +15,25 @@ import {
   Chip,
   ChoiceChip,
   CircleButton,
+  Dialog,
   Disclaimer,
+  EmptyState,
   FutureAvatar,
+  FutureMeRobot,
   ImageIcon,
   LanguageSwitch,
   Mark,
   MarkLabel,
   Notice,
   OptionRow,
+  PercentRing,
+  PocketCard,
+  PocketChip,
   ProgressRing,
   ProviderTile,
   Ripple,
   ScreenHeader,
+  ScrollPicker,
   SettingsIcon,
   SparkleIcon,
   StatCard,
@@ -34,6 +41,7 @@ import {
   TextField,
   Toggle,
   useToast,
+  Verdict,
   WalletIcon,
   WarningIcon,
 } from "@/ui";
@@ -305,7 +313,97 @@ export function ComponentsPage() {
           ))}
         </ul>
       </Section>
+      <V2Components />
     </main>
+  );
+}
+
+function V2Components() {
+  const [hours, setHours] = useState(8);
+  const [pocket, setPocket] = useState("fashion");
+  const [dialog, setDialog] = useState(false);
+  const pockets = [
+    { id: "fashion", name: "Fashion", pct: 47 },
+    { id: "gadgets", name: "Gadgets", pct: 54 },
+    { id: "entertainment", name: "Entertainment", pct: 22 },
+    { id: "travel", name: "Travel", pct: 65 },
+  ];
+  return (
+    <>
+      <Section title="v2 · Future Me robot (20 / 30 / 56 / 96)">
+        <div className="flex items-end gap-4">
+          {[20, 30, 56, 96].map((n) => (
+            <FutureMeRobot key={n} size={n} />
+          ))}
+        </div>
+      </Section>
+      <Section title="v2 · Percent rings">
+        <div className="flex items-center gap-4">
+          <PercentRing
+            label="Allocation 100%"
+            segments={[
+              { pct: 30, color: "var(--tt-color-pocket-fashion-ring)" },
+              { pct: 20, color: "var(--tt-color-pocket-gadgets-ring)" },
+              { pct: 25, color: "var(--tt-color-pocket-entertainment-ring)" },
+              { pct: 25, color: "var(--tt-color-pocket-travel-ring)" },
+            ]}
+            track="var(--tt-color-bg-surface)"
+          >
+            <span className="tt-number">100%</span>
+          </PercentRing>
+          <PercentRing label="Over-allocated 110%" tone="danger" segments={[{ pct: 110, color: "var(--tt-color-action-primary)" }]} track="var(--tt-color-bg-surface)">
+            <span className="tt-number text-danger">110%</span>
+          </PercentRing>
+          <PercentRing label="Wishlist 47%" segments={[{ pct: 47, color: "var(--tt-color-action-primary)" }]} track="var(--tt-color-bg-surface)">
+            <span className="tt-number">47%</span>
+          </PercentRing>
+        </div>
+      </Section>
+      <Section title="v2 · Scroll picker (hours per day)">
+        <ScrollPicker
+          label="Hours per day"
+          value={hours}
+          onChange={setHours}
+          options={[6, 7, 8, 9, 10].map((n) => ({ value: n, label: `${n} hrs` }))}
+        />
+        <p className="tt-small mt-2 text-ink-2">Selected: {hours}</p>
+      </Section>
+      <Section title="v2 · Pocket cards and chips">
+        <div className="grid grid-cols-2 gap-2">
+          {pockets.map((p) => (
+            <PocketCard key={p.id} pocketId={p.id} name={p.name} pct={p.pct} detail="sample" />
+          ))}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {pockets.map((p) => (
+            <PocketChip key={p.id} pocketId={p.id} name={p.name} selected={pocket === p.id} onClick={() => setPocket(p.id)} />
+          ))}
+        </div>
+      </Section>
+      <Section title="v2 · Verdict">
+        <div className="flex flex-col gap-2">
+          <Verdict status="healthy" label="Healthy" pocketId="fashion" barPct={73}>$240.10 left in Fashion (73%)</Verdict>
+          <Verdict status="not_healthy" label="Not healthy" pocketId="fashion" barPct={100}>Over by $37.90</Verdict>
+          <Verdict status="pocket_empty" label="Pocket empty" pocketId="fashion" barPct={100}>Nothing left in Fashion</Verdict>
+        </div>
+      </Section>
+      <Section title="v2 · Dialog and empty state">
+        <Button size="small" variant="secondary" onClick={() => setDialog(true)}>Open dialog</Button>
+        <Dialog
+          open={dialog}
+          onClose={() => setDialog(false)}
+          title="Already on your wishlist"
+          description="You saved this one before."
+          actions={
+            <>
+              <Button onClick={() => setDialog(false)}>View wishlist</Button>
+              <Button variant="secondary" onClick={() => setDialog(false)}>Add anyway</Button>
+            </>
+          }
+        />
+        <EmptyState art={<FutureMeRobot size={96} />} title="Nothing here yet" description="Check a product to start your wishlist." action={<Button>Check a product</Button>} />
+      </Section>
+    </>
   );
 }
 
