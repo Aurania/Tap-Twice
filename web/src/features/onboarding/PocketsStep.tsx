@@ -52,7 +52,7 @@ export function PocketsStep() {
       <h1 className="tt-h1 mt-4">{t("onboarding.pocketsTitle")}</h1>
       <p className="tt-body mt-2 text-ink-2">{t("onboarding.pocketsSub")}</p>
 
-      <section className={cx("mt-4 flex items-center gap-4 rounded-card p-4 text-white", state === "over" ? "bg-danger" : "bg-action")}>
+      <section className={cx("mt-4 flex items-center gap-4 rounded-card p-4 text-white", state === "over" ? "bg-danger-ink" : "bg-action")}>
         <PercentRing
           size={84}
           label={`${pctTotal}%`}
@@ -62,9 +62,9 @@ export function PocketsStep() {
           <span className="tt-body-strong text-white">{pctTotal}%</span>
         </PercentRing>
         <div className="min-w-0" aria-live="polite">
-          <p className="tt-small text-white/80">{state === "over" ? t("onboarding.overAllocated") : t("onboarding.leftToAllocate")}</p>
+          <p className="tt-small text-white/95">{state === "over" ? t("onboarding.overAllocated") : t("onboarding.leftToAllocate")}</p>
           <p className="tt-hero leading-none break-words" style={{ fontSize: headlineSize(headline) }}>{headline}</p>
-          <p className="tt-caption mt-1 text-white/80">
+          <p className="tt-caption mt-1 text-white/95">
             {state === "over"
               ? t("onboarding.overAllocatedHelp", { pct: pctTotal })
               : state === "under"

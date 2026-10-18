@@ -1,3 +1,5 @@
+> **Outdated: this is the v1 handoff** (cart screenshots, rupiah only, joy budget, the old API). v2 is described in [README.md](README.md) and [docs/v2/PHASE0_AUDIT.md](docs/v2/PHASE0_AUDIT.md). Kept for history.
+
 # Tap Twice: handoff context
 
 For whoever continues development, especially the frontend. Last updated 16 October 2026.

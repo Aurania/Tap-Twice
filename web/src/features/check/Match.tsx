@@ -87,15 +87,15 @@ export function Match() {
             />
           ) : noPrice ? (
             <p className="mt-1 flex items-baseline gap-3">
-              <span className="tt-h2 text-danger">{t("match.addPrice")}</span>
-              <button type="button" onClick={() => setEditing(true)} className="tt-link underline">
+              <span className="tt-h2 text-danger-ink">{t("match.addPrice")}</span>
+              <button type="button" onClick={() => setEditing(true)} className="tt-link -my-3 px-1 py-3 underline">
                 {t("match.typeIt")}
               </button>
             </p>
           ) : (
             <p className="mt-1 flex items-baseline gap-3">
               <span className="tt-h2">{money(price ?? 0)}</span>
-              <button type="button" onClick={() => setEditing(true)} className="tt-link underline">
+              <button type="button" onClick={() => setEditing(true)} className="tt-link -my-3 px-1 py-3 underline">
                 {t("match.edit")}
               </button>
             </p>
@@ -143,7 +143,7 @@ export function Match() {
           check.reset();
           navigate("/check", { replace: true });
         }}
-        className="tt-link mt-5 self-start underline"
+        className="tt-link mt-2 -mb-1 self-start py-3 underline"
       >
         {t("match.rescan")}
       </button>

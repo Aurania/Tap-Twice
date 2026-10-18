@@ -9,6 +9,7 @@ import { analyzeProduct, futureMe, MAX_USER_TURNS, NotAProductError, ReflectCont
 import { requireUser, type AuthEnv } from "./auth.js";
 import { config } from "./config.js";
 import { planPurchase, quotePaylater } from "./purchase.js";
+import { rateLimit } from "./rateLimit.js";
 import { AnalyzeRequestSchema, BudgetPreviewRequestSchema, CheckRequestSchema, FutureMeRequestSchema, PaylaterCostRequestSchema, ProfileSchema, PurchaseSchema, WishlistItemSchema } from "./schemas.js";
 import * as store from "./store.js";
 import { buildBudgetPreview, buildReality, buildSummary } from "./summary.js";
@@ -116,6 +117,13 @@ app.post("/api/check", async (c) => {
 });
 
 // ---- AI (Gemini on Vertex). The browser never calls the model; the server builds every number it may mention. ----
+
+// Per-user limits on the calls that cost model time. Generous for a person, tight for a loop.
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+app.use("/api/ai/analyze", rateLimit("analyze", [{ limit: 10, windowMs: MINUTE }, { limit: 60, windowMs: HOUR }]));
+app.use("/api/ai/reflect", rateLimit("reflect", [{ limit: 30, windowMs: MINUTE }, { limit: 200, windowMs: HOUR }]));
+app.use("/api/ai/future-me", rateLimit("future-me", [{ limit: 20, windowMs: MINUTE }, { limit: 200, windowMs: HOUR }]));
 
 /** Reads one product from a photo, screenshot or link: name, pocket match and price. */
 app.post("/api/ai/analyze", bodyLimit({ maxSize: 8 * 1024 * 1024 }), async (c) => {

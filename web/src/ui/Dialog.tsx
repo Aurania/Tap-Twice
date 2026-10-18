@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useFocusTrap } from "./useFocusTrap";
 
 type Props = {
   open: boolean;
@@ -17,6 +18,7 @@ export function Dialog({ open, onClose, art, title, description, actions }: Prop
   const titleId = useId();
   const descId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open);
 
   useEffect(() => {
     if (!open) return;

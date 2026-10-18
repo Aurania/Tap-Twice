@@ -139,8 +139,14 @@ export function Reality() {
               {t("realTalk")}
             </p>
           </header>
-          <p className="tt-body-strong mt-4 text-white/90">{t("reality.costs")}</p>
-          <p className="mt-1 flex items-center gap-3">
+          {/* The big number is decoration for the eyes; screen readers get the sentence as the page heading. */}
+          <h1 className="sr-only">
+            {t("reality.costs")} {reality.displayWorkHours} {t("reality.hoursUnit")}
+          </h1>
+          <p aria-hidden className="tt-body-strong mt-4 text-white/95">
+            {t("reality.costs")}
+          </p>
+          <p aria-hidden className="mt-1 flex items-center gap-3">
             <span className="font-display text-[120px] leading-[0.95] font-extrabold tabular-nums">{Math.round(hours ?? reality.displayWorkHours)}</span>
             <span className="tt-h1 max-w-[150px]">{t("reality.hoursUnit")}</span>
           </p>

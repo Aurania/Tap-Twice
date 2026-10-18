@@ -473,5 +473,11 @@ export const id: Record<StringKey, string> = {
   "realcost.titleItem": "Barang yang sama.",
   "realcost.use": "Pakai plan ini",
   "pay.logged": "Tercatat. Selamat menikmati! 🛍️",
+  "title.welcome": "Selamat datang · Tap Twice",
+  "title.onboarding": "Atur awal · Tap Twice",
+  "title.home": "Beranda · Tap Twice",
+  "title.wishlist": "Wishlist · Tap Twice",
+  "title.check": "Cek produk · Tap Twice",
+  "title.realCost": "Biaya sebenarnya · Tap Twice",
   "field.counter": "{count}/{max}",
 };

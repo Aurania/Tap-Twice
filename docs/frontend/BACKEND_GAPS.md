@@ -1,3 +1,5 @@
+> **Outdated (v1).** See [../../README.md](../../README.md) and [../v2/PHASE0_AUDIT.md](../v2/PHASE0_AUDIT.md) for v2.
+
 # Design vs backend: what the frontend does
 
 The Figma design was finished after the backend was built, so a few things differ. **The frontend follows the live backend today** and uses the fallbacks below. Items marked **Ask Afan** are small backend changes that unlock the full design; when one ships, switch from the fallback to the designed behavior.
