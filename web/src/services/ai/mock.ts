@@ -130,7 +130,8 @@ export class MockAiService implements AiService {
     yield { type: "tool", name: "check_pockets" };
     await this.wait(400, signal);
 
-    const reply = userTurns === 0 ? opening(context) : followUp(context, userTurns);
+    const lastUser = [...messages].reverse().find((m) => m.role === "user")?.text ?? "";
+    const reply = userTurns === 0 ? opening(context) : followUp(context, userTurns, lastUser);
     for (const word of reply.split(/(?<=\s)/)) {
       await this.wait(25, signal);
       yield { type: "text", text: word };
@@ -166,8 +167,15 @@ function opening(ctx: FutureMeContext): string {
   return `${hello} Tell me what you're thinking of buying and we'll think it through together with your pockets.`;
 }
 
-function followUp(ctx: FutureMeContext, userTurns: number): string {
+function followUp(ctx: FutureMeContext, userTurns: number, lastUser = ""): string {
   const c = ctx.checked;
+  const said = lastUser.toLowerCase();
+  if (said.includes("numbers")) {
+    return "They come from your income, your work hours and your pocket budgets. I only read them back to you, so double-check them against what you know.";
+  }
+  if (said.includes("wait") && c) {
+    return `Waiting is a real option. ${c.pocketName} refills in ${c.daysUntilRefill} days, and ${c.name} can sit on your wishlist until then. No rush either way.`;
+  }
   const focus = c ? ctx.pockets.find((p) => p.name === c.pocketName) : focusPocket(ctx);
   const left = focus ? `${money(focus.remaining, ctx)} left in ${focus.name}` : "your pockets";
   const options = [

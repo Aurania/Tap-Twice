@@ -21,20 +21,26 @@ export type IdentifiedProduct = {
 
 export type PriceReading = { price: number; currency: string };
 
+/** A product the user just checked, with the server's verdict. Future Me may talk about it. */
+export type CheckedProduct = {
+  name: string;
+  emoji: string;
+  price: number;
+  pocketName: string;
+  status: RealityStatus;
+  remainingAfter: number;
+  overBy: number;
+  displayWorkHours: number;
+  daysUntilRefill: number;
+};
+
 /** Everything Future Me may mention. All numbers come from the server (summary + check), never computed here. */
 export type FutureMeContext = {
   nickname?: string;
   currency: Currency;
   pockets: { id: string; name: string; budget: number; remaining: number; wishlistPct: number | null }[];
-  /** Present when the chat opens from a Reality card. */
-  checked?: {
-    name: string;
-    price: number;
-    pocketName: string;
-    status: RealityStatus;
-    remainingAfter: number;
-    displayWorkHours: number;
-  };
+  /** Present when the chat opens from a Reality card or the nudge. */
+  checked?: CheckedProduct;
 };
 
 /** What the Reality card paragraph may mention. All numbers come from the server (`/api/check`). */

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, ScrollRestoration, useNavigate } from "react-router";
 import { setNoProfileHandler } from "@/api";
+import { FutureMeProvider } from "@/features/futureMe/FutureMeProvider";
 
 /**
  * Mobile-first column: 390 px design width, centred in a 430 px column on desktop
@@ -16,7 +17,9 @@ export function RootLayout() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-page shadow-sm">
-      <Outlet />
+      <FutureMeProvider>
+        <Outlet />
+      </FutureMeProvider>
       <ScrollRestoration />
     </div>
   );
