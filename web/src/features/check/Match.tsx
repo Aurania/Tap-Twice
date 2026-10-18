@@ -16,6 +16,15 @@ const BUILT_IN = ["fashion", "gadgets", "entertainment", "travel"] as const;
 /** Mirrors the API's LOW_POCKET_PCT, used only while the deployed API does not send `lowAfter` yet. */
 const LOW_POCKET_PCT_FALLBACK = 20;
 
+/** A price in a currency the AI read; an odd code ("RP") must not break the screen. */
+function foreignAmount(amount: number, currency: string, lang: "en" | "id"): string {
+  try {
+    return formatMoney(amount, currency, lang);
+  } catch {
+    return `${amount} ${currency}`;
+  }
+}
+
 /** The pocket line under "Goes into pocket": a warning when buying overspends the pocket or leaves it low. */
 function pocketWarning(r: Reality): "empty" | "over" | "low" | null {
   if (r.status === "pocket_empty") return "empty";
@@ -102,7 +111,13 @@ export function Match() {
     <main className="flex flex-1 flex-col bg-page px-5 pt-[max(12px,env(safe-area-inset-top))] pb-[max(32px,env(safe-area-inset-bottom))]">
       <CheckHeader onBack={() => navigate("/check", { replace: true })} />
       <h2 className="tt-h1 mt-2">{t("match.title")}</h2>
-      <p className="tt-body mt-2 text-ink-2">{check.price === null && noPrice ? t("match.subNoPrice") : t("match.sub")}</p>
+      <p className="tt-body mt-2 text-ink-2">
+        {check.price === null && noPrice
+          ? check.foreignPrice
+            ? t("match.subForeign", { currency: check.foreignPrice.currency, amount: foreignAmount(check.foreignPrice.amount, check.foreignPrice.currency, lang), to: profile.currency })
+            : t("match.subNoPrice")
+          : t("match.sub")}
+      </p>
 
       <section className={cx("mt-4 flex gap-4 rounded-card p-4", check.price === null && noPrice ? "border-2 border-danger" : "border border-line")}>
         <span aria-hidden className="inline-flex size-[88px] shrink-0 items-center justify-center rounded-md bg-soft text-[44px]">
@@ -136,6 +151,18 @@ export function Match() {
               </button>
             </p>
           )}
+          {/* Read in another currency: converted on the server with the day's ECB rate. Hidden once the price is edited. */}
+          {check.priceFrom && price === check.price && !editing && (
+            <p className="tt-caption mt-1 text-ink-2">
+              {t("match.converted", {
+                original: formatMoney(check.priceFrom.price, check.priceFrom.currency, lang),
+                from: check.priceFrom.currency,
+                rate: new Intl.NumberFormat("en-US", { maximumSignificantDigits: 4 }).format(check.priceFrom.rate),
+                to: profile.currency,
+                date: new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${check.priceFrom.date}T00:00:00Z`)),
+              })}
+            </p>
+          )}
         </div>
       </section>
 
@@ -147,7 +174,7 @@ export function Match() {
               <span aria-hidden className="size-3 rounded-pill" style={{ background: pocketColor(pocket.id) }} />
               {pocket.name}
             </span>
-            {aiPicked && <span className="tt-caption rounded-pill bg-soft px-3 py-1 text-link">{t("match.aiMatched", { pct: product.matchConfidencePct })}</span>}
+            {aiPicked && <span className="tt-caption rounded-pill bg-soft px-3 py-1 text-link">{t("match.aiMatched")}</span>}
           </div>
           <p className="tt-small mt-2 text-ink-2">
             {[describe(pocket.id), t("match.leftMonth", { amount: money(pocket.remaining) })].filter(Boolean).join(" · ")}

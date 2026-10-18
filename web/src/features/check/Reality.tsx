@@ -8,13 +8,15 @@ import { ai } from "@/services/ai";
 import { useFutureMe } from "@/features/futureMe/FutureMeProvider";
 import type { CheckedProduct } from "@/services/ai";
 import { useCheck } from "@/state/CheckProvider";
+import { usePay } from "@/state/PayProvider";
 import { useProfile } from "@/state/ProfileProvider";
 import { BackIcon, Button, ChevronIcon, CircleButton, Dialog, Disclaimer, FutureMeRobot, ItemTile, Mark, Ripple, StatCard, Sticker, useToast, Verdict } from "@/ui";
 
 /**
  * 05 Reality card: Healthy, Not healthy and Pocket empty (N7). Every number comes from `/api/check`;
  * the paragraph comes from the AI service. "Add to wishlist" asks first when it is already there (N10).
- * "Not now" asks before leaving. Future Me is a card under the buttons that opens the chat.
+ * "Not now" asks before leaving. Future Me is a card that opens the chat. The two actions float at the bottom.
+ * After "Add to wishlist", the item opens in "How are you paying?" on the wishlist, as tapping a wishlist item does.
  */
 export function Reality() {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ export function Reality() {
   const { profile } = useProfile();
   const check = useCheck();
   const { openChat, queueNudge } = useFutureMe();
+  const pay = usePay();
   const { reality, product, price } = check;
   const [reflection, setReflection] = useState<string | null>(null);
   const [dupOpen, setDupOpen] = useState(false);
@@ -112,8 +115,20 @@ export function Reality() {
   const add = async () => {
     setSaving(true);
     try {
-      await api.addWishlist({ name: product.name, price, pocketId: reality.pocket.id, emoji: product.emoji });
+      const { id } = await api.addWishlist({ name: product.name, price, pocketId: reality.pocket.id, emoji: product.emoji });
       toast({ message: t("reality.added"), icon: true });
+      // Straight into the payment plan: pay in full or PayLater, the same sheet as a wishlist item.
+      pay.start({
+        id,
+        name: product.name,
+        price,
+        pocketId: reality.pocket.id,
+        emoji: product.emoji,
+        createdAt: null,
+        pocketPct: null,
+        workHours: reality.workHours,
+        pocketName: reality.pocket.name,
+      });
       leave("/wishlist");
     } catch {
       toast({ message: t("reality.addError") });
@@ -162,7 +177,7 @@ export function Reality() {
         </div>
       </section>
 
-      <section className="relative -mt-8 flex flex-1 flex-col rounded-t-sheet bg-page px-5 pt-3 pb-[max(24px,env(safe-area-inset-bottom))]">
+      <section className="relative -mt-8 flex flex-1 flex-col rounded-t-sheet bg-page px-5 pt-3 pb-[calc(max(16px,env(safe-area-inset-bottom))+96px)]">
         <span aria-hidden className="mx-auto mb-4 h-1 w-9 rounded-pill bg-line" />
         {reflection && (
           <div className="flex gap-3">
@@ -188,14 +203,6 @@ export function Reality() {
           barPct={verdict.bar}
         />
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <Button variant="secondary" disabled={saving} onClick={() => setLeaveOpen(true)}>
-            {t("reality.notNow")}
-          </Button>
-          <Button disabled={saving} onClick={() => (reality.duplicateOf ? setDupOpen(true) : void add())}>
-            {t("reality.addWishlist")}
-          </Button>
-        </div>
 
         <button
           type="button"
@@ -212,6 +219,18 @@ export function Reality() {
 
         <Disclaimer className="mt-auto pt-6" />
       </section>
+
+      {/* Floating actions: always in reach while scrolling the card. */}
+      <div className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[430px] border-t border-line bg-page/95 px-5 pt-3 pb-[max(16px,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgb(11_16_51/0.08)] backdrop-blur">
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="secondary" disabled={saving} onClick={() => setLeaveOpen(true)}>
+            {t("reality.notNow")}
+          </Button>
+          <Button disabled={saving} onClick={() => (reality.duplicateOf ? setDupOpen(true) : void add())}>
+            {t("reality.addWishlist")}
+          </Button>
+        </div>
+      </div>
 
       <Dialog
         open={leaveOpen}

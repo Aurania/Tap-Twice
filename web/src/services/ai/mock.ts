@@ -9,6 +9,7 @@ import {
   type IdentifiedProduct,
   type PocketOption,
   type ReflectContext,
+  type ForeignPrice,
   type PriceReading,
   type ProductInput,
 } from "./types";
@@ -18,9 +19,9 @@ import {
  * each state can be reached in the real app (set it from /dev/components or with setMockScenario).
  * "camera_denied" is not an AI failure: the Snap screen reads it to show N3 without changing browser permissions.
  */
-export type MockScenario = "ok" | "not_a_product" | "no_price" | "offline" | "unreachable" | "camera_denied";
+export type MockScenario = "ok" | "not_a_product" | "no_price" | "converted" | "foreign_price" | "offline" | "unreachable" | "camera_denied";
 
-export const MOCK_SCENARIOS: readonly MockScenario[] = ["ok", "not_a_product", "no_price", "offline", "unreachable", "camera_denied"];
+export const MOCK_SCENARIOS: readonly MockScenario[] = ["ok", "not_a_product", "no_price", "converted", "foreign_price", "offline", "unreachable", "camera_denied"];
 
 const STORAGE_KEY = "tt.ai.mock";
 let scenario: MockScenario = readStored();
@@ -101,10 +102,15 @@ export class MockAiService implements AiService {
     return { name: SAMPLE.name, detail: SAMPLE.detail, emoji: "👟", pocketId: (fashion ?? fallback).id, matchConfidencePct: fashion ? 92 : 55 };
   }
 
-  async readPrice(_input: ProductInput, signal?: AbortSignal): Promise<PriceReading | null> {
+  async readPrice(_input: ProductInput, signal?: AbortSignal): Promise<PriceReading | ForeignPrice | null> {
     await this.wait(500, signal);
     if (scenario === "offline") throw new AiError("offline");
     if (scenario === "no_price") return null;
+    // As the server sends it: a price read in pounds, converted with the day's ECB rate.
+    if (scenario === "converted") {
+      return { price: SAMPLE.price, currency: "USD", original: { price: 71.2, currency: "GBP", rate: 1.2626, date: "2026-10-16", source: "ECB via Frankfurter" } };
+    }
+    if (scenario === "foreign_price") return { price: null, currency: "VND", amount: 2_290_000 };
     return { price: SAMPLE.price, currency: "USD" };
   }
 

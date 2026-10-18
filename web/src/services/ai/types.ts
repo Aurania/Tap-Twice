@@ -19,7 +19,14 @@ export type IdentifiedProduct = {
   matchConfidencePct: number;
 };
 
-export type PriceReading = { price: number; currency: string | null };
+/** A price read in another currency and converted by the server with the day's ECB rate. */
+export type ConvertedFrom = { price: number; currency: string; rate: number; date: string; source: string };
+
+/** A price read from the photo or page, in the profile currency. `original` is set when it was converted. */
+export type PriceReading = { price: number; currency: string | null; original?: ConvertedFrom | null };
+
+/** A price was read, but in a currency the server has no rate for: the person types it in their own currency (N5). */
+export type ForeignPrice = { price: null; currency: string; amount: number };
 
 /** A product the user just checked, with the server's verdict. Future Me may talk about it. */
 export type CheckedProduct = {
@@ -102,7 +109,7 @@ export interface AiService {
    * Reads the price off the photo or link. Resolves null when no price is visible (N5: the user types it).
    * Throws AiError("offline").
    */
-  readPrice(input: ProductInput, signal?: AbortSignal): Promise<PriceReading | null>;
+  readPrice(input: ProductInput, signal?: AbortSignal): Promise<PriceReading | ForeignPrice | null>;
 
   /**
    * Two warm sentences for the Reality card ("Great shoes, wrong week…"). Resolves null when it cannot write one;
