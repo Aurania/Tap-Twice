@@ -1,7 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Outlet } from "react-router";
 import type { Currency, ProfileV2, Weekday } from "@/api";
 import { useI18n } from "@/i18n/I18nProvider";
+import { amountToInput, parseAmount } from "@/lib/amount";
 import { cx } from "@/lib/cx";
 import { BackIcon, CircleButton, LanguageSwitch } from "@/ui";
 
@@ -44,7 +45,7 @@ export function useOnboardingDraft(): DraftContext {
 
 /** Wraps the onboarding screens and keeps their answers while moving back and forth. */
 export function OnboardingLayout() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [draft, setDraft] = useState<OnboardingDraft>(() => ({
     nickname: "",
     currency: "USD",
@@ -59,6 +60,23 @@ export function OnboardingLayout() {
     targetDate: null,
   }));
   const update = useCallback((patch: Partial<OnboardingDraft>) => setDraft((d) => ({ ...d, ...patch })), []);
+
+  // Amounts are kept as typed text, which depends on the language's separators ("3,200" vs "3.200").
+  // When the language changes, re-read each amount with the old language and write it with the new one.
+  const prevLang = useRef(lang);
+  useEffect(() => {
+    const from = prevLang.current;
+    if (from === lang) return;
+    prevLang.current = lang;
+    setDraft((d) => {
+      const convert = (text: string) => {
+        const n = parseAmount(text, d.currency, from);
+        return n === null ? text : amountToInput(n, d.currency, lang);
+      };
+      return { ...d, income: convert(d.income), expenses: convert(d.expenses), target: convert(d.target), saved: convert(d.saved) };
+    });
+  }, [lang]);
+
   const value = useMemo(() => ({ draft, update }), [draft, update]);
   return (
     <Ctx.Provider value={value}>

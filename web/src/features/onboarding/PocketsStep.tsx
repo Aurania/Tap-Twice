@@ -62,7 +62,7 @@ export function PocketsStep() {
         </PercentRing>
         <div className="min-w-0" aria-live="polite">
           <p className="tt-small text-white/80">{state === "over" ? t("onboarding.overAllocated") : t("onboarding.leftToAllocate")}</p>
-          <p className="tt-hero text-[36px] leading-none">{headline}</p>
+          <p className="tt-hero leading-none break-words" style={{ fontSize: headlineSize(headline) }}>{headline}</p>
           <p className="tt-caption mt-1 text-white/80">
             {state === "over"
               ? t("onboarding.overAllocatedHelp", { pct: pctTotal })
@@ -123,6 +123,14 @@ export function PocketsStep() {
       />
     </OnboardingScreen>
   );
+}
+
+/** The big number shrinks for long amounts ("Rp 1.500.000", "¥1,500,000") so it stays inside the card. */
+function headlineSize(text: string): number {
+  if (text.length <= 7) return 36;
+  if (text.length <= 9) return 30;
+  if (text.length <= 12) return 26;
+  return 22;
 }
 
 /** TODO(design): custom pocket rules (empty, duplicate, limit) are not designed. Minimal: a name is required and unique, up to 12 pockets. */
