@@ -86,7 +86,7 @@ export function Home() {
         <>
           <section className="mt-4 flex items-center gap-4 rounded-card bg-surface p-4">
             <ProgressRing value={summary.goal.progressPct / 100} label={t("home.goalProgress", { pct: summary.goal.progressPct })}>
-              <span className={summary.goal.tone === "danger" ? "text-danger" : undefined}>{summary.goal.progressPct}%</span>
+              <span className={summary.goal.tone === "danger" ? "text-danger-ink" : undefined}>{summary.goal.progressPct}%</span>
             </ProgressRing>
             <div className="min-w-0 flex-1">
               <p className="tt-body-strong break-words text-ink">{summary.goal.name}</p>
@@ -124,7 +124,7 @@ export function Home() {
             <section className="mt-6">
               <div className="flex items-baseline justify-between">
                 <h2 className="tt-h2">{t("home.savedWishlist")}</h2>
-                <button type="button" onClick={() => navigate("/wishlist")} className="tt-link inline-flex items-center gap-1">
+                <button type="button" onClick={() => navigate("/wishlist")} className="tt-link -mr-2 inline-flex min-h-11 items-center gap-1 px-2">
                   {t("home.seeAll")} →
                 </button>
               </div>

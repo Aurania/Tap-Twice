@@ -22,7 +22,8 @@ export default defineConfig({
       manifest: {
         name: "Tap Twice",
         short_name: "Tap Twice",
-        description: "Tap once. Think twice. See the real cost of your cart before you pay.",
+        description: "Tap once. Think twice. See what a product really costs in hours of your work, and whether it fits your month.",
+        id: "/",
         lang: "en",
         start_url: "/",
         scope: "/",

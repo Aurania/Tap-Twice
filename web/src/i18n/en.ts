@@ -471,6 +471,12 @@ export const en = {
   "realcost.titleItem": "Same item.",
   "realcost.use": "Use this plan",
   "pay.logged": "Logged. Enjoy it! 🛍️",
+  "title.welcome": "Welcome · Tap Twice",
+  "title.onboarding": "Set up · Tap Twice",
+  "title.home": "Home · Tap Twice",
+  "title.wishlist": "Wishlist · Tap Twice",
+  "title.check": "Check a product · Tap Twice",
+  "title.realCost": "The real cost · Tap Twice",
   "field.counter": "{count}/{max}",
 } as const;
 

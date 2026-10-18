@@ -1,3 +1,5 @@
+> **Outdated (v1).** See [../../README.md](../../README.md) and [../v2/PHASE0_AUDIT.md](../v2/PHASE0_AUDIT.md) for v2.
+
 # Tap Twice screens: what to build
 
 Design: Figma file `EBxd7b9Wc8YsmIF9mO0sY6`. Read it through the Figma MCP connector.

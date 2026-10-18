@@ -1,3 +1,5 @@
+> **Outdated (v1).** See [../../README.md](../../README.md) and [../v2/PHASE0_AUDIT.md](../v2/PHASE0_AUDIT.md) for v2.
+
 # Prompts for Claude Code, phase by phase
 
 Paste one phase at a time. Wait until Claude Code says it's done and you've checked the result in the browser before pasting the next one. Each phase ends with a commit.

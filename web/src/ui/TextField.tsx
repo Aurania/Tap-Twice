@@ -50,7 +50,7 @@ export function TextField({ label, value, onChange, showCounter, helper, prefix,
         )}
       </div>
       {helper && (
-        <p id={helperId} className={cx("tt-small mt-1.5", tone === "danger" ? "text-danger" : "text-ink-2")}>
+        <p id={helperId} className={cx("tt-small mt-1.5", tone === "danger" ? "text-danger-ink" : "text-ink-2")}>
           {helper}
         </p>
       )}

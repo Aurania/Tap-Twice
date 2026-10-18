@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, type RouteObject } from "react-router";
 import { Splash } from "@/features/boot/Splash";
 import { Home } from "@/features/home/Home";
 import { Welcome } from "@/features/welcome/Welcome";
+import { RequireProfile } from "./RequireProfile";
 import { RootLayout } from "./RootLayout";
 
 /**
@@ -32,14 +33,19 @@ export const router = createBrowserRouter([
           { path: "goal", lazy: () => onboarding().then((m) => ({ Component: m.GoalStep })) },
         ],
       },
-      { path: "/home", element: <Home /> },
-      { path: "/check", lazy: () => check().then((m) => ({ Component: m.Snap })) },
-      { path: "/check/reading", lazy: () => check().then((m) => ({ Component: m.Reading })) },
-      { path: "/check/match", lazy: () => check().then((m) => ({ Component: m.Match })) },
-      { path: "/check/reality", lazy: () => check().then((m) => ({ Component: m.Reality })) },
-      { path: "/check/problem", lazy: () => check().then((m) => ({ Component: m.Problem })) },
-      { path: "/wishlist/real-cost", lazy: () => import("@/features/wishlist/RealCost").then((m) => ({ Component: m.RealCost })) },
-      { path: "/wishlist", lazy: () => import("@/features/wishlist/Wishlist").then((m) => ({ Component: m.Wishlist })) },
+      {
+        element: <RequireProfile />,
+        children: [
+          { path: "/home", element: <Home /> },
+          { path: "/check", lazy: () => check().then((m) => ({ Component: m.Snap })) },
+          { path: "/check/reading", lazy: () => check().then((m) => ({ Component: m.Reading })) },
+          { path: "/check/match", lazy: () => check().then((m) => ({ Component: m.Match })) },
+          { path: "/check/reality", lazy: () => check().then((m) => ({ Component: m.Reality })) },
+          { path: "/check/problem", lazy: () => check().then((m) => ({ Component: m.Problem })) },
+          { path: "/wishlist/real-cost", lazy: () => import("@/features/wishlist/RealCost").then((m) => ({ Component: m.RealCost })) },
+          { path: "/wishlist", lazy: () => import("@/features/wishlist/Wishlist").then((m) => ({ Component: m.Wishlist })) },
+        ],
+      },
       ...devRoutes,
       { path: "*", element: <Navigate to="/" replace /> },
     ],

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useFocusTrap } from "./useFocusTrap";
 
 type Props = {
   open: boolean;
@@ -20,6 +21,7 @@ export function BottomSheet({ open, onClose, title, description, header, childre
   const titleId = useId();
   const descId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open);
 
   useEffect(() => {
     if (!open) return;

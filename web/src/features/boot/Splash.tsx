@@ -30,7 +30,7 @@ export function Splash() {
         <span className="tt-pop size-8 rounded-pill bg-highlight" />
       </div>
       <p className="tt-rise tt-h1 mt-8 [animation-delay:700ms]">{t("app.name")}</p>
-      <p className="tt-small absolute bottom-[max(40px,env(safe-area-inset-bottom))] text-white/80">{t("app.tagline")}</p>
+      <p className="tt-small absolute bottom-[max(40px,env(safe-area-inset-bottom))] text-white/95">{t("app.tagline")}</p>
 
       {state.status === "error" && minDone && (
         <div className="tt-rise absolute inset-x-5 bottom-24 space-y-3 text-center">

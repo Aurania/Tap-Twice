@@ -51,6 +51,25 @@ describe("GeminiAiService.identifyProduct / readPrice", () => {
   });
 });
 
+describe("rate limits (429)", () => {
+  const limited = () => json({ error: "rate_limited", retryAfterSeconds: 30 }, 429);
+  it("a read that is rate limited shows the 'try again' screen, not a crash", async () => {
+    fetchMock.mockResolvedValueOnce(limited());
+    await expect(new GeminiAiService().identifyProduct(photo, [])).rejects.toMatchObject({ code: "offline" });
+  });
+  it("the Reality paragraph is simply left out", async () => {
+    fetchMock.mockResolvedValueOnce(limited());
+    expect(
+      await new GeminiAiService().reflect({ currency: "USD", productName: "NB", pocketName: "Fashion", status: "healthy", price: 1, remaining: 2, remainingAfter: 1, overBy: 0, displayWorkHours: 1, daysUntilRefill: 1, refillDate: "2026-11-01" }),
+    ).toBeNull();
+  });
+  it("the chat shows 'can't reach' with Try again", async () => {
+    fetchMock.mockResolvedValueOnce(limited());
+    const gen = new GeminiAiService().futureMeChat({ currency: "USD", pockets: [] }, []);
+    await expect(gen.next()).rejects.toMatchObject({ code: "unreachable" });
+  });
+});
+
 describe("GeminiAiService.reflect", () => {
   const ctx = { currency: "USD", productName: "NB", pocketName: "Fashion", status: "healthy", price: 89.9, remaining: 330, remainingAfter: 240.1, overBy: 0, displayWorkHours: 5, daysUntilRefill: 14, refillDate: "2026-11-01" } as const;
   it("sends the numbers (not the currency) and returns the text", async () => {

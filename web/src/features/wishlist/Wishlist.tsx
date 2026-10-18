@@ -70,11 +70,11 @@ export function Wishlist() {
               <span className="tt-body-strong text-white">{summary.wishlist.pct ?? 0}%</span>
             </PercentRing>
             <div className="min-w-0">
-              <p className="tt-small text-white/80">{t("wishlist.soFar")}</p>
+              <p className="tt-small text-white/95">{t("wishlist.soFar")}</p>
               <p className="tt-hero leading-none" style={{ fontSize: 36 }}>
                 {money(summary.wishlist.total)}
               </p>
-              <p className="tt-caption mt-1 text-white/80">
+              <p className="tt-caption mt-1 text-white/95">
                 {t("wishlist.summary", { pct: summary.wishlist.pct ?? 0, budget: money(summary.leftover), count: summary.pockets.length })}
               </p>
             </div>
@@ -91,7 +91,8 @@ export function Wishlist() {
                       {p.name}
                     </h2>
                     <span className="tt-caption text-ink-2">{t("wishlist.pocketOf", { total: formatMoney(p.wishlistTotal, profile.currency, lang), budget: money(p.budget) })}</span>
-                    <span className="tt-body-lg shrink-0" style={{ color: pocketColor(p.id), fontWeight: 700 }}>
+                    {/* Ink, not the pocket color: the light pocket colors fail text contrast. The dot and the bar keep the color. */}
+                    <span className="tt-body-lg shrink-0 text-ink" style={{ fontWeight: 700 }}>
                       {p.wishlistPct ?? 0}%
                     </span>
                   </div>
@@ -103,7 +104,7 @@ export function Wishlist() {
                       .reverse()
                       .map((it) => (
                         <li key={it.id}>
-                          <button type="button" onClick={() => pay.start({ ...it, pocketName: p.name })} className="flex w-full items-center gap-3 rounded-md text-left active:bg-surface">
+                          <button type="button" onClick={() => pay.start({ ...it, pocketName: p.name })} className="flex min-h-11 w-full items-center gap-3 rounded-md text-left active:bg-surface">
                             <ItemTile emoji={it.emoji} size="sm" />
                             <span className="tt-body min-w-0 flex-1 text-ink">{it.name}</span>
                             <span className="tt-small shrink-0 text-ink-2">{t("wishlist.itemLine", { price: money(it.price), pct: it.pocketPct ?? 0 })}</span>

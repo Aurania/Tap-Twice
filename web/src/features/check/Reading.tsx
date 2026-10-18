@@ -84,7 +84,7 @@ export function Reading() {
       </div>
 
       <h2 className="tt-h1 mt-6">{t("reading.title")}</h2>
-      <p className="tt-body mt-2 text-white/85">{t("reading.body")}</p>
+      <p className="tt-body mt-2 text-white/95">{t("reading.body")}</p>
 
       <ol className="mt-6 space-y-3" aria-live="polite">
         {steps.map((label, i) => {

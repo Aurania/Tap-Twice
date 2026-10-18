@@ -152,3 +152,21 @@ Source of truth for v2: `tap-twice-v2-handoff.md` + decisions in the chat (below
 - **Not verified:** a real product page link (only `example.com` was tried), a real camera photo, and the model's quality across many products; the model name comes from the existing config (`gemini-3.5-flash-lite`). Latency was about 3-5 s per call.
 - **Cost and abuse:** no rate limit or per-user cap on the AI routes yet (the chat is capped at 6 of the user's messages per conversation, image size at 8 MB). Worth adding before launch.
 - **Left:** deploy the API to Cloud Run (it still serves v1), then switch the web env.
+
+## Phase 10 log: hardening and final pass
+
+- **Deep links fixed:** screens that need a profile sit under `RequireProfile`, which waits while the profile loads instead of redirecting through the splash. Reloading `/wishlist` or `/check` now stays on that screen (checked in the browser).
+- **Rate limits:** `/api/ai/analyze` 10 per minute and 60 per hour, `/api/ai/reflect` 30 and 200, `/api/ai/future-me` 20 and 200, per user, answered with `429 rate_limited` and `Retry-After`. The web shows its normal "try again" state (N6, no paragraph, or 07e). In memory per Cloud Run instance, so it stops loops, not a determined user; a shared store is the follow-up if hard caps are needed.
+- **Accessibility pass** (automated script in the browser on Home, Wishlist, Snap, Reading, Match, Reality, the pay sheet, the chat and each negative screen: names on controls, labels on inputs, one `h1`, dialogs named and modal, tap-target size, text contrast, plus real Tab and Shift+Tab inside a sheet). Fixed: sheets and dialogs now trap focus; each screen sets its own page title; the Reality card has a real `h1` (the big number is visual only); wishlist rows, "See all", "Edit", "Type it" and "Rescan" are 44 px tall targets; text contrast.
+- **Deviations from Figma for contrast (your call):** the pocket percentage on the Wishlist is ink, not the pocket color (the light pocket colors fail 4.5:1; the dot and bar keep the color); error text and the over-allocated card use a darker red (`--tt-color-danger-ink`, `#C62828`) because white text on `#E64040` is 3.9:1; small white text on blue is 95%, not 80%.
+- **Not changed:** Figma's circle buttons (40 px) and chips (39–42 px) are slightly under 44 px; they are the designed sizes. A full screen reader pass (VoiceOver, TalkBack) and Lighthouse were not run.
+- **PWA:** manifest (name, scope, standalone, theme, any and maskable icons), service worker (autoUpdate, app shell precached, fonts cached, API never cached), Apple touch icon and meta are in place. Fixed the stale "cart" description and added a manifest `id`. Install prompt and offline behavior on a real phone were not tried.
+- **Docs:** README rewritten for v2 (architecture, API, local run, deploy, costs); `web/.env.example` added; the root `.env.example` (for the removed v1 smoke script) removed; the v1 handoff docs carry an "outdated" banner.
+- **All 10 negative cases plus 07e, run again in the app** (mock scenarios, local API): N1 expenses ≥ income, N2 pockets ≠ 100%, N3 camera off, N4 not a product, N5 price not found, N6 offline, N7 pocket empty, N9 empty wishlist, N10 already on the wishlist, N11 empty Home, 07e Future Me can't be reached. N8 (no cheaper option) was dropped with the alternatives feature.
+
+### Still open for you
+
+1. **Deploy:** the API on Cloud Run is still v1. Deploying this branch replaces it (v1 profiles re-onboard), so deploy the web together.
+2. **Undesigned screens** (handoff §12): goal-card detail and 6-month projection, pockets "Edit", Settings, the goal screen redesign, the robot covering "Check a product", custom pocket rules and colors, the under-100% allocation state, the Future Me nudge trigger and quick replies, v2 PayLater screens and copy, per-country PayLater providers and the SLIK note.
+3. **Timezone** for "this month" and the refill date is UTC.
+4. **Real-world AI check:** real product links, real camera photos and quality across many products.
