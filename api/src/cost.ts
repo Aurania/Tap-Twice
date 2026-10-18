@@ -25,7 +25,6 @@ const round = (n: number, digits = 0) => {
 /**
  * installment = price / tenor + price × rate; total = installment × tenor + admin.
  * `digits` is the decimals of the currency: 0 for IDR/JPY (the v1 default), 2 for USD and most others.
- * TODO(phase 8): pass the profile currency's decimals from the route.
  */
 export function paylaterCost(price: number, terms: PaylaterTerms, digits = 0): PaylaterResult {
   const tenor = Math.max(1, Math.round(terms.tenorMonths));
