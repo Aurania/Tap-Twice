@@ -11,7 +11,6 @@ import {
   BookmarkIcon,
   Button,
   Chip,
-  ChevronIcon,
   CircleButton,
   Disclaimer,
   FutureMeFab,
@@ -21,6 +20,7 @@ import {
   pocketColor,
   ProgressRing,
   Ripple,
+  SettingsIcon,
 } from "@/ui";
 
 const HOME_ITEMS = 4;
@@ -29,8 +29,7 @@ const HOME_ITEMS = 4;
  * 02 Home. Greeting with a line that depends on the wishlist (N11 when it is empty), goal, pockets,
  * the Check the stuff card, a short Saved wishlist and the floating Future Me robot.
  * Every number comes from `/api/summary`.
- * TODO(design): the goal chevron and "Edit" (pockets) lead to screens that are not designed (handoff §12 #6), so
- * the chevron is only drawn and "Edit" is left out. The Settings button is also left out: v2 has no Settings screen yet.
+ * Tapping a pocket opens that pocket's wishlist. The gear opens Settings (edit profile, reset).
  */
 export function Home() {
   const navigate = useNavigate();
@@ -73,7 +72,10 @@ export function Home() {
           <Mark size={20} />
           {t("app.name")}
         </span>
-        <CircleButton label={t("home.saved")} icon={<BookmarkIcon className="size-5" />} onClick={() => navigate("/wishlist")} />
+        <div className="flex gap-2">
+          <CircleButton label={t("home.saved")} icon={<BookmarkIcon className="size-5" />} onClick={() => navigate("/wishlist")} />
+          <CircleButton label={t("home.settings")} icon={<SettingsIcon className="size-5" />} onClick={() => navigate("/settings")} />
+        </div>
       </header>
 
       {/* Heading/Greeting wraps; long nicknames are never truncated (rule 7). */}
@@ -93,14 +95,21 @@ export function Home() {
               <p className="tt-small text-ink-2">{t("home.goalOf", { saved: money(summary.goal.savedAmount), target: money(summary.goal.targetAmount) })}</p>
               <p className="tt-caption text-ink-2">{t("home.goalBy", { date: formatMonthYear(summary.goal.targetDate, lang) })}</p>
             </div>
-            <ChevronIcon aria-hidden className="size-5 shrink-0 text-ink-2" />
           </section>
 
           <section className="mt-6">
             <h2 className="tt-h2">{t("home.pockets")}</h2>
             <div className="mt-3 grid grid-cols-2 gap-2.5">
               {summary.pockets.map((p) => (
-                <PocketCard key={p.id} pocketId={p.id} name={p.name} value={money(p.budget)} pct={p.wishlistPct} caption={t("home.wishlisted", { pct: p.wishlistPct ?? 0 })} />
+                <PocketCard
+                  key={p.id}
+                  pocketId={p.id}
+                  name={p.name}
+                  value={money(p.budget)}
+                  pct={p.wishlistPct}
+                  caption={t("home.wishlisted", { pct: p.wishlistPct ?? 0 })}
+                  onClick={() => navigate(`/wishlist/pocket/${encodeURIComponent(p.id)}`)}
+                />
               ))}
             </div>
           </section>

@@ -22,7 +22,6 @@ import {
   FutureAvatar,
   FutureMeRobot,
   ImageIcon,
-  LanguageSwitch,
   Mark,
   MarkLabel,
   Notice,
@@ -55,7 +54,7 @@ type Check = { state: "pending" } | { state: "ok"; detail: string } | { state: "
  */
 export function ComponentsPage() {
   const navigate = useNavigate();
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const toast = useToast();
 
   const [health, setHealth] = useState<Check>({ state: "pending" });
@@ -88,7 +87,7 @@ export function ComponentsPage() {
 
   return (
     <main className="px-5 pb-16">
-      <ScreenHeader title="Components" onBack={() => navigate("/")} right={<LanguageSwitch value={lang} onChange={setLang} />} />
+      <ScreenHeader title="Components" onBack={() => navigate("/")} />
 
       <Section title="Live checks">
         <ul className="space-y-2">
@@ -198,16 +197,12 @@ export function ComponentsPage() {
         </div>
       </Section>
 
-      <Section title="Text field · Toggle · Language">
+      <Section title="Text field · Toggle">
         <TextField label="What should we call you? (optional)" value={nickname} onChange={setNickname} maxLength={20} showCounter />
         <TextField className="mt-3" label="Monthly take-home income" prefix="Rp" inputMode="numeric" value="8.500.000" onChange={() => {}} helper="A rough number is fine. Never linked to your bank 🔒" />
         <div className="mt-4 flex items-center justify-between rounded-md border border-line px-4 py-3">
           <span className="tt-body-strong">Avoid interest</span>
           <Toggle checked={avoidInterest} onChange={setAvoidInterest} label="Avoid interest" />
-        </div>
-        <div className="mt-4 flex items-center gap-3 rounded-card bg-action p-4">
-          <LanguageSwitch value={lang} onChange={setLang} onBlue />
-          <span className="tt-small text-white">on blue (W1)</span>
         </div>
       </Section>
 

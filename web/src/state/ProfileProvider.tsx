@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, type ProfileV2 } from "@/api";
 import { ensureUser } from "@/auth/firebase";
-import { useI18n } from "@/i18n/I18nProvider";
 
 type ProfileState =
   | { status: "loading" }
@@ -20,7 +19,6 @@ const ProfileContext = createContext<ProfileContextValue | null>(null);
 
 /** Signs in anonymously and loads `GET /api/profile` once at start (Splash waits for it). */
 export function ProfileProvider({ children }: { children: ReactNode }) {
-  const { setLang } = useI18n();
   const [state, setState] = useState<ProfileState>({ status: "loading" });
 
   const load = useCallback(() => {
@@ -29,11 +27,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       .then(() => api.getProfile())
       .then(({ profile }) => {
         // After onboarding, profile.language wins over the local choice (gaps #12).
-        if (profile) setLang(profile.language);
         setState({ status: "ready", profile });
       })
       .catch(() => setState({ status: "error" }));
-  }, [setLang]);
+  }, []);
 
   useEffect(load, [load]);
 

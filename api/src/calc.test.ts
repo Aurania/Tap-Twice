@@ -20,6 +20,8 @@ import {
   realityStatus,
   remainingAfter,
   remainingAfterPct,
+  isLowAfter,
+  LOW_POCKET_PCT,
   round2,
   totalWishlistPct,
   workHours,
@@ -152,6 +154,21 @@ describe("remainingAfterPct and remainingAfter", () => {
   it("is 0 when nothing was left and null without a budget", () => {
     expect(remainingAfterPct(89.9, 0, 330)).toBe(0);
     expect(remainingAfterPct(89.9, 0, 0)).toBeNull();
+  });
+});
+
+describe("isLowAfter", () => {
+  it("flags a purchase that fits but leaves under 20% of the budget", () => {
+    expect(LOW_POCKET_PCT).toBe(20);
+    expect(isLowAfter("healthy", 19)).toBe(true);
+    expect(isLowAfter("healthy", 0)).toBe(true);
+  });
+  it("is false at 20% and above, without a budget, and for the other statuses", () => {
+    expect(isLowAfter("healthy", 20)).toBe(false);
+    expect(isLowAfter("healthy", 73)).toBe(false);
+    expect(isLowAfter("healthy", null)).toBe(false);
+    expect(isLowAfter("not_healthy", 0)).toBe(false);
+    expect(isLowAfter("pocket_empty", 0)).toBe(false);
   });
 });
 

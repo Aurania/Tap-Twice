@@ -74,6 +74,11 @@ export type Reality = {
   /** "Fashion left" stat: after buying; negative when over; 0 when the pocket was already empty. */
   remainingAfter: number;
   remainingAfterPct: number | null;
+  /**
+   * Fits, but leaves the pocket under 20% of its budget for the rest of the month (api calc.ts LOW_POCKET_PCT).
+   * Optional until the API that sends it is deployed.
+   */
+  lowAfter?: boolean;
   overBy: number;
   /** First day of next month, "YYYY-MM-DD". */
   refillDate: string;

@@ -2,7 +2,7 @@ import { useRef, type ReactNode, type TouchEvent } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
 import { useI18n } from "@/i18n/I18nProvider";
 import { cx } from "@/lib/cx";
-import { Button, ChatBubble, FutureMeRobot, LanguageSwitch, Mark, Ripple, Sticker } from "@/ui";
+import { Button, ChatBubble, FutureMeRobot, Mark, Ripple, Sticker } from "@/ui";
 
 /** W1–W4 Welcome (first time only). Copy is v2 (single product, sample $89.90 = 5 hours, fits Fashion); Figma still shows the v1 cart copy. Swipe or Next; Skip jumps to W4; Get started → onboarding. */
 export function Welcome() {
@@ -79,12 +79,12 @@ function SkipButton({ onSkip }: { onSkip: () => void }) {
 const pad = "px-5 pt-[max(12px,env(safe-area-inset-top))] pb-[max(36px,env(safe-area-inset-bottom))]";
 
 function W1({ onNext }: { onNext: () => void }) {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   return (
     <main className={cx("relative flex flex-1 flex-col overflow-hidden bg-action text-white", pad)}>
       <Ripple size={780} rings={6} inner={56} dot className="absolute top-[400px] left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/60" />
       <div className="relative">
-        <Header onBlue right={<LanguageSwitch value={lang} onChange={setLang} onBlue />} />
+        <Header onBlue />
       </div>
       <div aria-hidden className="relative flex-1">
         <Sticker tone="white" rotate={4} className="absolute top-[180px] left-0">

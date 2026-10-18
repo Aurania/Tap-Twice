@@ -23,4 +23,5 @@ export {
   X as CloseIcon,
   Trash as TrashIcon,
   LifeBuoy as SupportIcon,
+  Pencil as EditIcon,
 } from "lucide-react";

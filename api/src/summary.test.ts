@@ -102,13 +102,18 @@ describe("buildReality (the New Balance shoes, $89.90 in Fashion)", () => {
       pctOfIncome: 2.8,
       remainingAfter: 240.1,
       remainingAfterPct: 73,
+      lowAfter: false,
       pocket: { id: "fashion", budget: 330, remaining: 330 },
     });
     expect(r.workHours).toBeCloseTo(4.87, 2);
   });
   it("not healthy with $52 left", () => {
     const r = buildReality(profile, wishlist, purchasesFor("stretched"), check)!;
-    expect(r).toMatchObject({ status: "not_healthy", remainingAfter: -37.9, remainingAfterPct: 0, overBy: 37.9, pocket: { remaining: 52 } });
+    expect(r).toMatchObject({ status: "not_healthy", remainingAfter: -37.9, remainingAfterPct: 0, lowAfter: false, overBy: 37.9, pocket: { remaining: 52 } });
+  });
+  it("low: fits, but leaves under 20% of the $330 budget", () => {
+    const r = buildReality(profile, wishlist, purchasesFor("fresh"), { ...check, price: 280 })!;
+    expect(r).toMatchObject({ status: "healthy", remainingAfter: 50, remainingAfterPct: 15, lowAfter: true });
   });
   it("N7: pocket empty with $0 left", () => {
     const r = buildReality(profile, wishlist, purchasesFor("empty"), check)!;

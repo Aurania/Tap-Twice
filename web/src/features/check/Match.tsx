@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router";
-import { api } from "@/api";
+import { api, type Reality } from "@/api";
 import { AddPocketSheet } from "@/features/onboarding/AddPocketSheet";
 import { useI18n } from "@/i18n/I18nProvider";
 import { amountToInput, parseAmount } from "@/lib/amount";
@@ -8,10 +8,21 @@ import { cx } from "@/lib/cx";
 import { formatMoney } from "@/lib/format";
 import { useCheck } from "@/state/CheckProvider";
 import { useProfile } from "@/state/ProfileProvider";
-import { AmountField, Button, pocketColor, useToast } from "@/ui";
+import { AmountField, Button, pocketColor, useToast, WarningIcon } from "@/ui";
 import { CheckHeader } from "./CheckHeader";
 
 const BUILT_IN = ["fashion", "gadgets", "entertainment", "travel"] as const;
+
+/** Mirrors the API's LOW_POCKET_PCT, used only while the deployed API does not send `lowAfter` yet. */
+const LOW_POCKET_PCT_FALLBACK = 20;
+
+/** The pocket line under "Goes into pocket": a warning when buying overspends the pocket or leaves it low. */
+function pocketWarning(r: Reality): "empty" | "over" | "low" | null {
+  if (r.status === "pocket_empty") return "empty";
+  if (r.status === "not_healthy") return "over";
+  const low = r.lowAfter ?? (r.remainingAfterPct !== null && r.remainingAfterPct < LOW_POCKET_PCT_FALLBACK);
+  return low ? "low" : null;
+}
 
 /**
  * 04 Product & pocket match, and N5 (price not found). The price can be edited, the pocket changed or a custom one made.
@@ -28,6 +39,27 @@ export function Match() {
   const [editing, setEditing] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  // The server's verdict for the current price and pocket, for the "Goes into pocket" warning (and reused by the button).
+  const [preview, setPreview] = useState<{ key: string; reality: Reality } | null>(null);
+  const priceNow = profile ? parseAmount(priceText, profile.currency, lang) : null;
+  const previewKey = product && check.pocketId && priceNow !== null && priceNow > 0 ? `${check.pocketId}|${priceNow}` : null;
+
+  useEffect(() => {
+    if (!previewKey || !product || !check.pocketId || priceNow === null) return;
+    let alive = true;
+    const timer = window.setTimeout(() => {
+      api
+        .check({ name: product.name, price: priceNow, pocketId: check.pocketId! })
+        .then(({ reality }) => alive && setPreview({ key: previewKey, reality }))
+        .catch(() => undefined); // the warning is a hint; "Check my reality" still asks again
+    }, 300);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+    // previewKey stands for pocket + price.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewKey]);
 
   if (!profile || !product || !summary || !check.pocketId) return <Navigate to="/check" replace />;
 
@@ -36,6 +68,9 @@ export function Match() {
   const noPrice = price === null || price <= 0;
   const pocket = summary.pockets.find((p) => p.id === check.pocketId);
   const aiPicked = check.pocketId === product.pocketId;
+  // Only trust the verdict that matches what is on screen.
+  const current = preview && preview.key === previewKey ? preview.reality : null;
+  const warning = current ? pocketWarning(current) : null;
   const describe = (id: string) => (BUILT_IN.includes(id as (typeof BUILT_IN)[number]) ? t(`pocket.desc.${id as (typeof BUILT_IN)[number]}`) : null);
 
   const addCustom = async (name: string) => {
@@ -53,7 +88,8 @@ export function Match() {
     if (noPrice || price === null) return;
     setBusy(true);
     try {
-      const { reality } = await api.check({ name: product.name, price, pocketId: check.pocketId! });
+      const key = `${check.pocketId}|${price}`;
+      const reality = preview?.key === key ? preview.reality : (await api.check({ name: product.name, price, pocketId: check.pocketId! })).reality;
       check.patch({ price, reality });
       navigate("/check/reality");
     } catch {
@@ -105,7 +141,7 @@ export function Match() {
 
       <p className="tt-small mt-4 mb-1.5 text-ink-2">{t("match.goesInto")}</p>
       {pocket && (
-        <section className="rounded-card border-2 border-action p-4">
+        <section className={cx("rounded-card border-2 p-4", warning ? "border-danger bg-danger-tint" : "border-action")}>
           <div className="flex items-center justify-between gap-2">
             <span className="tt-body-lg flex items-center gap-2 text-ink" style={{ fontWeight: 700 }}>
               <span aria-hidden className="size-3 rounded-pill" style={{ background: pocketColor(pocket.id) }} />
@@ -116,6 +152,16 @@ export function Match() {
           <p className="tt-small mt-2 text-ink-2">
             {[describe(pocket.id), t("match.leftMonth", { amount: money(pocket.remaining) })].filter(Boolean).join(" · ")}
           </p>
+          {warning && current && (
+            <p role="status" className="tt-small mt-2 flex gap-1.5 font-semibold text-danger-ink">
+              <WarningIcon aria-hidden className="mt-0.5 size-4 shrink-0" />
+              {warning === "empty"
+                ? t("match.warnEmpty", { pocket: pocket.name })
+                : warning === "over"
+                  ? t("match.warnOver", { pocket: pocket.name, amount: money(current.overBy) })
+                  : t("match.warnLow", { pocket: pocket.name, left: money(current.remainingAfter), pct: current.remainingAfterPct ?? 0 })}
+            </p>
+          )}
         </section>
       )}
 

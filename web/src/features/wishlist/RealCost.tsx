@@ -10,7 +10,7 @@ import { Button, CalendarIcon, Chip, Notice, OptionRow, ScreenHeader, SproutIcon
 /**
  * 06 The real cost: pay in full next to PayLater for this wishlist item, with the server's numbers.
  * "Use this plan" goes back to "How are you paying?" with the plan chosen.
- * TODO(design): Figma shows the v1 screen (cart, screenshot, "Save for later"). The late-payment note names SLIK OJK, an Indonesian
+ * TODO(design): Figma shows the v1 screen (cart, screenshot, "Save for later"). The late-payment note used to name SLIK OJK (Indonesian); it now says "the Financial Service Authority in your country". An Indonesian
  * regulator; it is shown to everyone until the handoff says otherwise.
  */
 export function RealCost() {

@@ -1,7 +1,7 @@
 // Builds the numbers the app displays (Home, Wishlist, Reality card) from stored data.
 // Pure: composes calc.ts, no I/O. The frontend only renders these results.
 
-import {
+import { isLowAfter,
   allocationTotal,
   displayWorkHours,
   goalProgressPct,
@@ -148,6 +148,8 @@ export interface Reality {
   remainingAfter: number;
   /** Left in the pocket after buying, as a % of its budget (the bar). */
   remainingAfterPct: number | null;
+  /** Fits, but leaves the pocket low for the rest of the month (under LOW_POCKET_PCT of its budget). */
+  lowAfter: boolean;
   /** How far the price goes over what is left ("Pushes Fashion $37.90 over budget"); 0 when it fits. */
   overBy: number;
   /** When the pocket refills: the first day of next month, "YYYY-MM-DD". */
@@ -170,6 +172,7 @@ export function buildReality(profile: Profile, wishlist: StoredWishlistItem[], p
   const hours = workHours(req.price, rate);
   const duplicate = wishlist.find((w) => w.pocketId === req.pocketId && normalize(w.name) === normalize(req.name));
   const status = realityStatus(req.price, pocket.remaining);
+  const pctAfter = remainingAfterPct(req.price, pocket.remaining, pocket.budget);
   return {
     status,
     hourlyRate: rate,
@@ -178,7 +181,8 @@ export function buildReality(profile: Profile, wishlist: StoredWishlistItem[], p
     pctOfIncome: pctOfIncome(req.price, profile.monthlyIncome),
     pocket: { id: pocket.id, name: pocket.name, budget: pocket.budget, remaining: pocket.remaining },
     remainingAfter: status === "pocket_empty" ? 0 : remainingAfter(req.price, pocket.remaining),
-    remainingAfterPct: remainingAfterPct(req.price, pocket.remaining, pocket.budget),
+    remainingAfterPct: pctAfter,
+    lowAfter: isLowAfter(status, pctAfter),
     overBy: status === "pocket_empty" ? req.price : overBy(req.price, pocket.remaining),
     refillDate: nextRefill(now).toISOString().slice(0, 10),
     daysUntilRefill: daysUntilRefill(now),

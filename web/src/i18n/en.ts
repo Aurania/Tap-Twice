@@ -304,8 +304,43 @@ export const en = {
   "settings.resetBody": "This deletes your profile, saved items, and history from this device. It can't be undone.",
   "settings.resetYes": "Yes, reset everything",
 
+  "onboarding.editPocketTitle": "Edit pocket",
+  "onboarding.pocketSave": "Save",
+  "onboarding.pocketRemoveButton": "Remove pocket",
+  "onboarding.pocketKeepOne": "You need at least one pocket.",
+  "onboarding.pocketEdit": "Edit {name}",
+  "onboarding.pocketAmount": "{name} amount per month",
+  "onboarding.max100": "Max is 100%. Lower another pocket first.",
+
+  "settings.expenses": "Monthly expenses",
+  "settings.workValue": "{hours} hrs × {days} days",
+  "settings.pockets": "Pockets",
+  "settings.pocketsValue": "{count} pockets",
+  "settings.data": "Your data",
+  "settings.editTitle": "Edit profile",
+  "settings.currencyFixed": "Currency can't be changed after setup: your saved items are in it.",
+  "settings.resetError": "Couldn't reset just now. Try again.",
+
+  "match.warnOver": "This is {amount} more than what's left in {pocket} this month. Buying it means overspending.",
+  "match.warnEmpty": "{pocket} is already used up this month. Anything bought here is overspending.",
+  "match.warnLow": "After this, only {left} ({pct}%) is left in {pocket} for the rest of the month. That's most of the pocket on one thing.",
+
+  "reality.leaveTitle": "Leave without saving?",
+  "reality.leaveBody": "You'll go back to Home, and {name} won't be added to your wishlist.",
+  "reality.leaveYes": "Yes, go back",
+  "reality.leaveNo": "Stay here",
+  "reality.futureCardTitle": "Ask Future Me",
+  "reality.futureCardBody": "Not sure? Talk it through with the you who hit your goal.",
+
+  "wishlist.pocketTitle": "{pocket} wishlist",
+  "wishlist.pocketSummary": "{total} wishlisted of {budget} this month",
+  "wishlist.pocketLeft": "{amount} left to spend this month",
+  "wishlist.pocketEmptyTitle": "Nothing in {pocket} yet",
+  "wishlist.pocketEmptyBody": "Check a product and save it here when it belongs in {pocket}.",
+  "wishlist.allPockets": "See all pockets",
+
   "notice.lateTitle": "Heads-up on late payments",
-  "notice.lateBody": "Late payments can be reported to SLIK OJK and may affect future loans, like a mortgage.",
+  "notice.lateBody": "Late payments can be reported to the Financial Service Authority in your country and may affect future loans, like a mortgage.",
 
   "onboarding.currencyHelp": "Default is USD. Tap to pick another country's currency.",
   "onboarding.currencySheetTitle": "Choose your currency",
@@ -476,6 +511,7 @@ export const en = {
   "title.home": "Home · Tap Twice",
   "title.wishlist": "Wishlist · Tap Twice",
   "title.check": "Check a product · Tap Twice",
+  "title.settings": "Settings · Tap Twice",
   "title.realCost": "The real cost · Tap Twice",
   "field.counter": "{count}/{max}",
 } as const;
