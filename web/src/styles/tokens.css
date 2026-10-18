@@ -15,6 +15,29 @@
   --tt-color-action-primary: #3d5afe; /* primary buttons, brand blue screens */
   --tt-color-action-highlight: #ffd84d; /* stickers, highlight chips, ripple dot */
 
+  /* Color · pockets (v2). Each pocket has a solid color and a lighter ring color. */
+  --tt-color-pocket-fashion: #ed5999;
+  --tt-color-pocket-fashion-ring: #ed5999;
+  --tt-color-pocket-gadgets: #669eff;
+  --tt-color-pocket-gadgets-ring: #8cbfff;
+  --tt-color-pocket-entertainment: #ffb340;
+  --tt-color-pocket-entertainment-ring: #ffb340;
+  --tt-color-pocket-travel: #4dd9cc;
+  --tt-color-pocket-travel-ring: #4dd9cc;
+
+  /* Color · Future Me robot (v2). Body reuses highlight yellow, screen reuses navy (bg-inverse). */
+  --tt-color-robot-body: #ffd94d;
+  --tt-color-robot-outline: #0a0f33;
+  --tt-color-robot-screen: #0a0f33;
+  --tt-color-robot-face: #ffd94d;
+  --tt-color-robot-antenna: #ed5999;
+
+  /* Color · status (v2). Healthy / Not healthy / Pocket empty and error states. */
+  --tt-color-success: #2eb373;
+  --tt-color-success-tint: #e6f7ed;
+  --tt-color-danger: #e64040;
+  --tt-color-danger-tint: #ffebeb;
+
   /* Color · text */
   --tt-color-text-primary: #0b1033;
   --tt-color-text-secondary: #5e6178;
@@ -69,6 +92,17 @@
   --color-link: var(--tt-color-text-link);
   --color-warn: var(--tt-color-text-warning);
   --color-line: var(--tt-color-border-default);
+
+  --color-pocket-fashion: var(--tt-color-pocket-fashion);
+  --color-pocket-gadgets: var(--tt-color-pocket-gadgets);
+  --color-pocket-entertainment: var(--tt-color-pocket-entertainment);
+  --color-pocket-travel: var(--tt-color-pocket-travel);
+  --color-robot-body: var(--tt-color-robot-body);
+  --color-robot-screen: var(--tt-color-robot-screen);
+  --color-success: var(--tt-color-success);
+  --color-success-tint: var(--tt-color-success-tint);
+  --color-danger: var(--tt-color-danger);
+  --color-danger-tint: var(--tt-color-danger-tint);
 
   --radius-sm: var(--tt-radius-sm);
   --radius-md: var(--tt-radius-md);
