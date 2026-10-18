@@ -38,3 +38,8 @@ export const formatHours = (hours: number, lang: Language): string =>
 
 /** Whole days (BACKEND_GAPS.md #20). */
 export const formatDays = (days: number, lang: Language): string => formatDecimal(Math.round(days), lang, 0);
+
+/** "$89.90", "Rp 90.000", "¥9,000": any profile currency, display only. */
+export function formatMoney(value: number, currency: string, lang: Language): string {
+  return new Intl.NumberFormat(lang === "id" ? "id-ID" : "en-US", { style: "currency", currency }).format(value);
+}
