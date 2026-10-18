@@ -382,9 +382,9 @@ function V2Components() {
       </Section>
       <Section title="v2 · Verdict">
         <div className="flex flex-col gap-2">
-          <Verdict status="healthy" label="Healthy" pocketId="fashion" barPct={73}>$240.10 left in Fashion (73%)</Verdict>
-          <Verdict status="not_healthy" label="Not healthy" pocketId="fashion" barPct={100}>Over by $37.90</Verdict>
-          <Verdict status="pocket_empty" label="Pocket empty" pocketId="fashion" barPct={100}>Nothing left in Fashion</Verdict>
+          <Verdict status="healthy" title="Healthy" subtitle="Fashion stays at 73% after this buy" barLabel="Fashion pocket" barValue="$240.10 left of $330" barPct={73} />
+          <Verdict status="not_healthy" title="Not healthy" subtitle="Fashion would be over by $37.90" barLabel="Fashion pocket" barValue="$52 left of $330" barPct={0} />
+          <Verdict status="pocket_empty" title="Pocket empty" subtitle="Nothing left in Fashion this month" barLabel="Fashion pocket" barValue="$0 left of $330" barPct={0} />
         </div>
       </Section>
       <Section title="v2 · Dialog and empty state">

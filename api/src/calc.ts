@@ -66,10 +66,19 @@ export function realityStatus(price: number, remaining: number): RealityStatus {
   return "healthy";
 }
 
-/** Share of the pocket's remaining amount still left after buying, 0–100 (330 → 240.10 = 73). Null if nothing was left. */
-export function remainingAfterPct(price: number, remaining: number): number | null {
-  if (!(remaining > 0)) return null;
-  return Math.max(0, Math.round(((remaining - price) / remaining) * 100));
+/**
+ * What is left in the pocket after buying, as a share of the pocket BUDGET, 0–100.
+ * Figma "Fashion stays at 73% after this buy" / "$240.10 left of $330": (330 − 89.90) / 330 = 73.
+ * Null when the pocket has no budget.
+ */
+export function remainingAfterPct(price: number, remaining: number, budget: number): number | null {
+  if (!(budget > 0)) return null;
+  return Math.max(0, Math.round(((remaining - price) / budget) * 100));
+}
+
+/** What is left in the pocket after buying, never below 0 (the "Fashion left" stat). */
+export function remainingAfter(price: number, remaining: number): number {
+  return Math.max(0, round2(remaining - price));
 }
 
 /**
