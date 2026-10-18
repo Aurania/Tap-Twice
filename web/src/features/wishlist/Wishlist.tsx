@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router";
 import { api, type Summary } from "@/api";
 import { useI18n } from "@/i18n/I18nProvider";
 import { formatMoney } from "@/lib/format";
+import { usePay } from "@/state/PayProvider";
 import { useProfile } from "@/state/ProfileProvider";
+import { PayFlow } from "./PayFlow";
 import { BackIcon, Button, CircleButton, EmptyState, FutureMeRobot, ItemTile, PercentRing, PocketBar, pocketColor } from "@/ui";
 
 /**
  * 06 Wishlist by pocket, and N9 when it is empty. Summary card, then one card per pocket that has items.
- * TODO(phase 8): tapping an item opens "How are you paying?" (PayLater flow); rows are static until then.
+Tapping an item opens "How are you paying?" (PayFlow).
  * TODO(design): pockets without items are left out; the handoff only shows pockets with items.
  */
 export function Wishlist() {
@@ -18,10 +20,14 @@ export function Wishlist() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
-    if (!profile) return;
+  const pay = usePay();
+
+  const load = useCallback(() => {
     api.getSummary().then((r) => setSummary(r.summary)).catch(() => setFailed(true));
-  }, [profile]);
+  }, []);
+  useEffect(() => {
+    if (profile) load();
+  }, [profile, load]);
 
   if (state.status === "loading" || state.status === "error") return <Navigate to="/" replace />;
   if (!profile) return <Navigate to="/welcome/1" replace />;
@@ -96,10 +102,12 @@ export function Wishlist() {
                       .filter((it) => it.pocketId === p.id)
                       .reverse()
                       .map((it) => (
-                        <li key={it.id} className="flex items-center gap-3">
-                          <ItemTile emoji={it.emoji} size="sm" />
-                          <span className="tt-body min-w-0 flex-1 text-ink">{it.name}</span>
-                          <span className="tt-small shrink-0 text-ink-2">{t("wishlist.itemLine", { price: money(it.price), pct: it.pocketPct ?? 0 })}</span>
+                        <li key={it.id}>
+                          <button type="button" onClick={() => pay.start({ ...it, pocketName: p.name })} className="flex w-full items-center gap-3 rounded-md text-left active:bg-surface">
+                            <ItemTile emoji={it.emoji} size="sm" />
+                            <span className="tt-body min-w-0 flex-1 text-ink">{it.name}</span>
+                            <span className="tt-small shrink-0 text-ink-2">{t("wishlist.itemLine", { price: money(it.price), pct: it.pocketPct ?? 0 })}</span>
+                          </button>
                         </li>
                       ))}
                   </ul>
@@ -108,6 +116,8 @@ export function Wishlist() {
           </div>
         </>
       )}
+
+      <PayFlow onLogged={load} />
     </main>
   );
 }

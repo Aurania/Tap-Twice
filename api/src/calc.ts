@@ -145,3 +145,39 @@ export function goalProgressPct(saved: number, target: number): number {
 export function goalTone(progressPct: number): "danger" | "neutral" {
   return progressPct < 50 ? "danger" : "neutral";
 }
+
+/** Decimals a currency uses in amounts: 0 for IDR and JPY, 2 for the rest of the supported ones. */
+export function currencyDigits(currency: string): number {
+  return currency === "IDR" || currency === "JPY" ? 0 : 2;
+}
+
+export interface PurchasePlan {
+  /** First month the purchase hits a pocket, "YYYY-MM" (UTC). */
+  startMonth: string;
+  /** 1 for pay in full; the tenor for PayLater. */
+  months: number;
+  /** What leaves the pocket each month. */
+  installment: number;
+  /** One-time fee, charged in the first month on top of the installment. */
+  adminFee: number;
+}
+
+const monthIndex = (ym: string) => {
+  const [y, m] = ym.split("-").map(Number);
+  return (y ?? 0) * 12 + ((m ?? 1) - 1);
+};
+
+/** "YYYY-MM" of a date, UTC. */
+export function monthKey(d: Date): string {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/**
+ * What a purchase takes from its pocket in a given month (`ym`, "YYYY-MM").
+ * Pay in full: the whole price in its month. PayLater: one installment per month of the tenor, plus the one-time fee in the first.
+ */
+export function amountInMonth(plan: PurchasePlan, ym: string): number {
+  const k = monthIndex(ym) - monthIndex(plan.startMonth);
+  if (k < 0 || k >= plan.months) return 0;
+  return round2(plan.installment + (k === 0 ? plan.adminFee : 0));
+}

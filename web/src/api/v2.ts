@@ -98,7 +98,23 @@ export type BudgetPreview = {
 
 export type CheckInput = { name: string; price: number; pocketId: string };
 export type NewWishlistItemV2 = { name: string; price: number; pocketId: string; emoji?: string };
-export type NewPurchase = { name: string; amount: number; pocketId: string };
+/** PayLater terms: give the monthly rate, or the monthly payment from the user's app (the server works the rate out). */
+export type PaylaterTerms = { tenorMonths: number; monthlyRatePct?: number; monthlyPayment?: number; adminFee: number };
+
+/** The server's numbers for one PayLater plan. */
+export type PaylaterQuote = {
+  tenorMonths: number;
+  monthlyInstallment: number;
+  totalPaid: number;
+  extraCost: number;
+  extraCostPct: number;
+  lateFee: number | null;
+  monthlyRatePct: number;
+  adminFee: number;
+};
+
+/** "Log it": pay in full, or with PayLater. A wishlist item given by id is removed. */
+export type NewPurchase = { name: string; price: number; pocketId: string; wishlistId?: string; paylater?: PaylaterTerms | null };
 
 /** One function per v2 endpoint. 409 `no_profile` goes through the shared client handler. */
 export const apiV2 = {
@@ -115,4 +131,5 @@ export const apiV2 = {
   addWishlist: (item: NewWishlistItemV2) => request<{ id: string }>("POST", "/api/wishlist", item),
   removeWishlist: (id: string) => request<{ ok: true }>("DELETE", `/api/wishlist/${encodeURIComponent(id)}`),
   addPurchase: (purchase: NewPurchase) => request<{ id: string }>("POST", "/api/purchases", purchase),
+  paylaterCost: (price: number, paylater: PaylaterTerms) => request<{ plan: PaylaterQuote }>("POST", "/api/paylater/cost", { price, paylater }),
 };

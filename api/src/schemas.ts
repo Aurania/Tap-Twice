@@ -77,11 +77,35 @@ export const WishlistItemSchema = z.object({
 });
 export type WishlistItemInput = z.infer<typeof WishlistItemSchema>;
 
-/** A purchase that was actually made. Pocket remaining = budget − these (wishlist does not count). */
+/** PayLater terms. Give the monthly rate, or the monthly payment from the user's app and the server works the rate out. */
+export const PaylaterInputSchema = z
+  .object({
+    tenorMonths: z.number().int().min(1).max(36),
+    monthlyRatePct: z.number().finite().min(0).max(20).optional(),
+    monthlyPayment: z.number().finite().positive().optional(),
+    adminFee: money.default(0),
+    lateFee: money.optional(),
+  })
+  .refine((p) => p.monthlyRatePct !== undefined || p.monthlyPayment !== undefined, { message: "rate_or_payment_required" });
+export type PaylaterInput = z.infer<typeof PaylaterInputSchema>;
+
+/** Numbers for one PayLater plan, no side effects. */
+export const PaylaterCostRequestSchema = z.object({
+  price: z.number().finite().positive(),
+  paylater: PaylaterInputSchema,
+});
+
+/**
+ * "Log it": a purchase that was actually made, from a wishlist item or straight from a price.
+ * Pay in full takes the price from the pocket this month; PayLater takes an installment each month of the tenor.
+ * Pocket remaining = budget − these (the wishlist does not count). A given wishlist item is removed.
+ */
 export const PurchaseSchema = z.object({
   name: z.string().trim().min(1).max(200),
-  amount: z.number().finite().positive(),
+  price: z.number().finite().positive(),
   pocketId: z.string().trim().min(1).max(40),
+  wishlistId: z.string().trim().min(1).max(100).optional(),
+  paylater: PaylaterInputSchema.nullish(),
 });
 export type PurchaseInput = z.infer<typeof PurchaseSchema>;
 
