@@ -1,3 +1,5 @@
+> **v2 in progress (branch `feat/web-v2`).** This file still describes v1. What changed: money math lives on the server (`api/src/calc.ts`, `summary.ts`); the app is pockets + wishlist + Check the stuff + Future Me; AI goes through `src/services/ai` (mock first). Decisions, status and open items are in `docs/v2/PHASE0_AUDIT.md`. Stack, tokens, i18n and the "never shame" tone below still apply. v1 screen and API details below are outdated.
+
 # Tap Twice web app: instructions for Claude Code
 
 You are building the **frontend PWA** in `web/` of the Tap Twice monorepo. The backend in `api/` is already built and deployed. Read this file fully before writing code, then read:

@@ -2,12 +2,16 @@
 // Pure: composes calc.ts, no I/O. The frontend only renders these results.
 
 import {
+  allocationTotal,
   displayWorkHours,
   goalProgressPct,
   goalTone,
   hourlyRate,
+  hasRoomForPockets,
+  isAllocationValid,
   itemPocketPct,
   leftover,
+  overAllocatedBy,
   pctOfIncome,
   pocketBudget,
   pocketRemaining,
@@ -149,5 +153,38 @@ export function buildReality(profile: Profile, wishlist: StoredWishlistItem[], p
     remainingAfter: remainingAfter(req.price, pocket.remaining),
     remainingAfterPct: remainingAfterPct(req.price, pocket.remaining, pocket.budget),
     duplicateOf: duplicate?.id ?? null,
+  };
+}
+
+export interface BudgetPreview {
+  leftover: number;
+  /** false → N1: nothing left for pockets. */
+  hasRoom: boolean;
+  /** How much expenses are above income (0 when they are not). N1 copy: "Expenses are $600 higher than income". */
+  expensesOverBy: number;
+  allocationTotal: number;
+  /** false → N2. */
+  valid: boolean;
+  /** Percentage points over (+) or under (−) 100. */
+  overAllocatedBy: number;
+  /** Money over (+) or under (−) the leftover: "Over-allocated by $110". */
+  overAllocatedAmount: number;
+  budgets: { id: string; budget: number }[];
+}
+
+/** Stateless numbers for the onboarding sliders, before a profile exists. */
+export function buildBudgetPreview(monthlyIncome: number, monthlyExpenses: number, pockets: { id: string; allocationPct: number }[]): BudgetPreview {
+  const left = leftover(monthlyIncome, monthlyExpenses);
+  const pcts = pockets.map((p) => p.allocationPct);
+  const overPct = overAllocatedBy(pcts);
+  return {
+    leftover: left,
+    hasRoom: hasRoomForPockets(monthlyIncome, monthlyExpenses),
+    expensesOverBy: left < 0 ? round2(-left) : 0,
+    allocationTotal: allocationTotal(pcts),
+    valid: isAllocationValid(pcts),
+    overAllocatedBy: overPct,
+    overAllocatedAmount: pocketBudget(left, overPct),
+    budgets: pockets.map((p) => ({ id: p.id, budget: pocketBudget(left, p.allocationPct) })),
   };
 }

@@ -41,5 +41,7 @@ export const formatDays = (days: number, lang: Language): string => formatDecima
 
 /** "$89.90", "Rp 90.000", "¥9,000": any profile currency, display only. */
 export function formatMoney(value: number, currency: string, lang: Language): string {
-  return new Intl.NumberFormat(lang === "id" ? "id-ID" : "en-US", { style: "currency", currency }).format(value);
+  // Whole amounts drop the cents ("$330"); others keep the currency's decimals ("$89.90").
+  const minimumFractionDigits = Number.isInteger(value) ? 0 : undefined;
+  return new Intl.NumberFormat(lang === "id" ? "id-ID" : "en-US", { style: "currency", currency, minimumFractionDigits }).format(value);
 }

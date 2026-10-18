@@ -7,17 +7,23 @@ type Props<T extends string | number> = {
   value: T;
   onChange: (value: T) => void;
   label: string;
+  /** Draw the selection band. Turn off when several pickers share one band drawn by the parent. */
+  band?: boolean;
+  /** Background class of the selection band: "bg-soft" on white, "bg-page" on a grey card. */
+  bandClassName?: string;
 };
 
-const ROW = 44;
+export const PICKER_ROW = 44;
+const ROW = PICKER_ROW;
 const VISIBLE = 5; // 5 rows, the middle one is selected
-const PAD = Math.floor(VISIBLE / 2);
+export const PICKER_PAD = Math.floor(VISIBLE / 2);
+const PAD = PICKER_PAD;
 
 /** Row opacity by distance from the selected row: 1, 0.5, 0.25 (handoff §11). */
 const fade = (distance: number) => (distance === 0 ? 1 : distance === 1 ? 0.5 : 0.25);
 
 /** Scroll-snap picker: 5 visible rows, a band behind the middle one, rows above and below fade out. */
-export function ScrollPicker<T extends string | number>({ options, value, onChange, label }: Props<T>) {
+export function ScrollPicker<T extends string | number>({ options, value, onChange, label, band = true, bandClassName = "bg-soft" }: Props<T>) {
   const id = useId();
   const ref = useRef<HTMLDivElement>(null);
   const settle = useRef<number | undefined>(undefined);
@@ -50,7 +56,7 @@ export function ScrollPicker<T extends string | number>({ options, value, onChan
 
   return (
     <div className="relative mx-auto w-full" style={{ height: ROW * VISIBLE }}>
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 rounded-md bg-soft" style={{ top: ROW * PAD, height: ROW }} />
+      {band && <div aria-hidden className={`pointer-events-none absolute inset-x-0 rounded-md ${bandClassName}`} style={{ top: ROW * PAD, height: ROW }} />}
       <div
         ref={ref}
         role="listbox"
