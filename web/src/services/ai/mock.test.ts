@@ -34,6 +34,7 @@ describe("MockAiService.identifyProduct", () => {
     expect(await ai.identifyProduct(photo, pockets)).toEqual({
       name: "New Balance Fresh Foam 680",
       detail: "Running shoes · Men's",
+      emoji: "👟",
       pocketId: "fashion",
       matchConfidencePct: 92,
     });

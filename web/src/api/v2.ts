@@ -47,6 +47,7 @@ export type WishlistItemV2 = {
   name: string;
   price: number;
   pocketId: string;
+  emoji: string | null;
   createdAt: string | null;
   pocketPct: number | null;
   workHours: number;
@@ -58,6 +59,8 @@ export type Summary = {
   leftover: number;
   goal: GoalV2 & { progressPct: number; tone: "danger" | "neutral" };
   pockets: PocketSummary[];
+  /** Pocket with the most left this month; null when all are used up. */
+  roomiestPocketId: string | null;
   wishlist: { total: number; pct: number | null; items: WishlistItemV2[] };
 };
 
@@ -88,7 +91,7 @@ export type BudgetPreview = {
 };
 
 export type CheckInput = { name: string; price: number; pocketId: string };
-export type NewWishlistItemV2 = { name: string; price: number; pocketId: string };
+export type NewWishlistItemV2 = { name: string; price: number; pocketId: string; emoji?: string };
 export type NewPurchase = { name: string; amount: number; pocketId: string };
 
 /** One function per v2 endpoint. 409 `no_profile` goes through the shared client handler. */

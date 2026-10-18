@@ -30,7 +30,7 @@ export async function listWishlist(uid: string): Promise<StoredWishlistItem[]> {
   return snap.docs
     .map((d) => {
       const data = d.data();
-      return { id: d.id, name: data.name, price: data.price, pocketId: data.pocketId, createdAt: toIso(data.createdAt) };
+      return { id: d.id, name: data.name, price: data.price, pocketId: data.pocketId, emoji: data.emoji ?? null, createdAt: toIso(data.createdAt) };
     })
     .filter((w) => typeof w.pocketId === "string"); // v1 items had no pocket
 }

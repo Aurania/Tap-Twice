@@ -69,6 +69,18 @@ describe("buildSummary (seed, fresh month)", () => {
     expect(s.goal.progressPct).toBe(25);
     expect(s.goal.tone).toBe("danger");
   });
+  it("picks the pocket with the most left as 'has room' (Fashion, $330)", () => {
+    expect(s.roomiestPocketId).toBe("fashion");
+    expect(buildSummary(profile, wishlist, purchasesFor("stretched")).roomiestPocketId).toBe("entertainment"); // Fashion 52 left; Entertainment and Travel 275, first wins
+  });
+  it("has no roomiest pocket when every pocket is used up", () => {
+    const all = profile.pockets.map((p) => ({ amount: 100000, pocketId: p.id }));
+    expect(buildSummary(profile, wishlist, all).roomiestPocketId).toBeNull();
+  });
+  it("passes the wishlist item emoji through", () => {
+    const withEmoji = buildSummary(profile, [{ ...wishlist[0]!, emoji: "👟" }], []);
+    expect(withEmoji.wishlist.items[0]?.emoji).toBe("👟");
+  });
   it("N9/N11: an empty wishlist is 0% everywhere", () => {
     const empty = buildSummary(profile, [], []);
     expect(empty.wishlist.total).toBe(0);
