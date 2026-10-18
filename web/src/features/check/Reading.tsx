@@ -27,7 +27,7 @@ export function Reading() {
   useEffect(() => {
     if (!input || !profile) return;
     const ctrl = new AbortController();
-    patch({ problem: null, product: null, price: null }); // a retry starts clean
+    patch({ problem: null, product: null, price: null, priceFrom: null, foreignPrice: null }); // a retry starts clean
     const settle = async (started: number) => sleep(Math.max(0, MIN_STEP_MS - (performance.now() - started)));
 
     (async () => {
@@ -46,7 +46,12 @@ export function Reading() {
         t0 = performance.now();
         const { summary } = await api.getSummary();
         await settle(t0);
-        patch({ price: priceReading?.price ?? null, summary });
+        patch({
+          price: priceReading?.price ?? null,
+          priceFrom: priceReading && priceReading.price !== null ? (priceReading.original ?? null) : null,
+          foreignPrice: priceReading && priceReading.price === null ? priceReading : null,
+          summary,
+        });
         setDone(3);
 
         await sleep(300);

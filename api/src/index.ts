@@ -6,6 +6,7 @@ import { logger } from "hono/logger";
 import { streamSSE } from "hono/streaming";
 import type { z } from "zod";
 import { analyzeProduct, futureMe, MAX_USER_TURNS, NotAProductError, ReflectContextSchema, writeReflection } from "./ai.js";
+import { toProfileCurrency } from "./fx.js";
 import { requireUser, type AuthEnv } from "./auth.js";
 import { config } from "./config.js";
 import { planPurchase, quotePaylater } from "./purchase.js";
@@ -132,7 +133,10 @@ app.post("/api/ai/analyze", bodyLimit({ maxSize: 8 * 1024 * 1024 }), async (c) =
   const profile = await store.getProfile(c.get("uid"));
   if (!profile) return c.json({ error: "no_profile" }, 409);
   try {
-    return c.json(await analyzeProduct(req.input, profile.pockets.map((p) => ({ id: p.id, name: p.name })), profile.language));
+    const analysis = await analyzeProduct(req.input, profile.pockets.map((p) => ({ id: p.id, name: p.name })), profile.language);
+    // A price in another currency is converted to the profile currency with the day's ECB rate (or left for the person to type).
+    const { price, unconverted } = await toProfileCurrency(analysis.price, profile.currency);
+    return c.json({ product: analysis.product, price, unconverted });
   } catch (err) {
     if (err instanceof NotAProductError) return c.json({ error: "not_a_product" }, 422);
     console.error("analyze failed:", err instanceof Error ? err.message : err);

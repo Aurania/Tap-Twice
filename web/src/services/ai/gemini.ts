@@ -7,12 +7,17 @@ import {
   type FutureMeEvent,
   type IdentifiedProduct,
   type PocketOption,
+  type ForeignPrice,
   type PriceReading,
   type ProductInput,
   type ReflectContext,
 } from "./types";
 
-type Analysis = { product: IdentifiedProduct; price: PriceReading | null };
+/** `/api/ai/analyze`: the price is already in the profile currency (converted when it was read in another one). */
+type Analysis = { product: IdentifiedProduct; price: PriceReading | null; unconverted?: { price: number; currency: string } | null };
+
+const priceOf = (a: Analysis): PriceReading | ForeignPrice | null =>
+  a.price ?? (a.unconverted ? { price: null, currency: a.unconverted.currency, amount: a.unconverted.price } : null);
 
 /**
  * The real provider: Gemini on Vertex AI, always through our API (the browser never calls the model).
@@ -21,7 +26,7 @@ type Analysis = { product: IdentifiedProduct; price: PriceReading | null };
  * Select it with VITE_AI_PROVIDER=gemini; the mock stays the default.
  */
 export class GeminiAiService implements AiService {
-  private last: { input: ProductInput; price: PriceReading | null } | null = null;
+  private last: { input: ProductInput; price: PriceReading | ForeignPrice | null } | null = null;
 
   private async analyze(input: ProductInput, signal?: AbortSignal): Promise<Analysis> {
     try {
@@ -36,15 +41,15 @@ export class GeminiAiService implements AiService {
 
   async identifyProduct(input: ProductInput, _pockets: PocketOption[], signal?: AbortSignal): Promise<IdentifiedProduct> {
     const analysis = await this.analyze(input, signal);
-    this.last = { input, price: analysis.price };
+    this.last = { input, price: priceOf(analysis) };
     return analysis.product;
   }
 
-  async readPrice(input: ProductInput, signal?: AbortSignal): Promise<PriceReading | null> {
+  async readPrice(input: ProductInput, signal?: AbortSignal): Promise<PriceReading | ForeignPrice | null> {
     if (this.last?.input === input) return this.last.price;
     const analysis = await this.analyze(input, signal);
-    this.last = { input, price: analysis.price };
-    return analysis.price;
+    this.last = { input, price: priceOf(analysis) };
+    return this.last.price;
   }
 
   async reflect(context: ReflectContext, signal?: AbortSignal): Promise<string | null> {
