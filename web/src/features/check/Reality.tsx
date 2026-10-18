@@ -93,6 +93,7 @@ export function Reality() {
     name: product.name,
     emoji: product.emoji,
     price,
+    pocketId: reality.pocket.id,
     pocketName: pocket,
     status,
     remainingAfter: reality.remainingAfter,

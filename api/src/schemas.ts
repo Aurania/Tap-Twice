@@ -123,3 +123,20 @@ export const BudgetPreviewRequestSchema = z.object({
   monthlyExpenses: money,
   pockets: z.array(z.object({ id: z.string().trim().min(1).max(40), allocationPct: z.number().finite().min(0).max(100) })).max(12),
 });
+
+/** A photo, a screenshot or a link to read one product from. */
+export const ProductInputSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("image"), mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]), data: z.string().min(100).max(8_000_000) }), // base64, no "data:" prefix
+  z.object({ kind: z.literal("link"), url: z.url({ protocol: /^https?$/ }).max(2000) }),
+]);
+export type ProductInput = z.infer<typeof ProductInputSchema>;
+
+export const AnalyzeRequestSchema = z.object({ input: ProductInputSchema });
+
+export const ChatTurnSchema = z.object({ role: z.enum(["user", "model"]), text: z.string().max(2000) });
+
+/** The chat is rebuilt from stored data; only the product being discussed and the messages come from the browser. */
+export const FutureMeRequestSchema = z.object({
+  messages: z.array(ChatTurnSchema).max(20),
+  checked: z.object({ name: z.string().trim().min(1).max(200), price: z.number().finite().positive(), pocketId: z.string().trim().min(1).max(40) }).optional(),
+});

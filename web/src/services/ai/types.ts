@@ -19,13 +19,14 @@ export type IdentifiedProduct = {
   matchConfidencePct: number;
 };
 
-export type PriceReading = { price: number; currency: string };
+export type PriceReading = { price: number; currency: string | null };
 
 /** A product the user just checked, with the server's verdict. Future Me may talk about it. */
 export type CheckedProduct = {
   name: string;
   emoji: string;
   price: number;
+  pocketId: string;
   pocketName: string;
   status: RealityStatus;
   remainingAfter: number;

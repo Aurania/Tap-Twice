@@ -1,12 +1,15 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { streamSSE } from "hono/streaming";
 import type { z } from "zod";
+import { analyzeProduct, futureMe, MAX_USER_TURNS, NotAProductError, ReflectContextSchema, writeReflection } from "./ai.js";
 import { requireUser, type AuthEnv } from "./auth.js";
 import { config } from "./config.js";
 import { planPurchase, quotePaylater } from "./purchase.js";
-import { BudgetPreviewRequestSchema, CheckRequestSchema, PaylaterCostRequestSchema, ProfileSchema, PurchaseSchema, WishlistItemSchema } from "./schemas.js";
+import { AnalyzeRequestSchema, BudgetPreviewRequestSchema, CheckRequestSchema, FutureMeRequestSchema, PaylaterCostRequestSchema, ProfileSchema, PurchaseSchema, WishlistItemSchema } from "./schemas.js";
 import * as store from "./store.js";
 import { buildBudgetPreview, buildReality, buildSummary } from "./summary.js";
 
@@ -112,7 +115,62 @@ app.post("/api/check", async (c) => {
   return c.json({ reality });
 });
 
-// TODO(phase 9): AI routes (identify product, read price, Future Me chat) once the provider is wired in.
+// ---- AI (Gemini on Vertex). The browser never calls the model; the server builds every number it may mention. ----
+
+/** Reads one product from a photo, screenshot or link: name, pocket match and price. */
+app.post("/api/ai/analyze", bodyLimit({ maxSize: 8 * 1024 * 1024 }), async (c) => {
+  const req = await body(c.req.raw, AnalyzeRequestSchema);
+  if (!req) return c.json({ error: "invalid_input" }, 400);
+  const profile = await store.getProfile(c.get("uid"));
+  if (!profile) return c.json({ error: "no_profile" }, 409);
+  try {
+    return c.json(await analyzeProduct(req.input, profile.pockets.map((p) => ({ id: p.id, name: p.name })), profile.language));
+  } catch (err) {
+    if (err instanceof NotAProductError) return c.json({ error: "not_a_product" }, 422);
+    console.error("analyze failed:", err instanceof Error ? err.message : err);
+    return c.json({ error: "ai_failed" }, 502);
+  }
+});
+
+/** The Reality card paragraph, from numbers the server already computed. Null when the model cannot write it. */
+app.post("/api/ai/reflect", async (c) => {
+  const ctx = await body(c.req.raw, ReflectContextSchema);
+  if (!ctx) return c.json({ error: "invalid_context" }, 400);
+  const profile = await store.getProfile(c.get("uid"));
+  if (!profile) return c.json({ error: "no_profile" }, 409);
+  return c.json({ reflection: await writeReflection(ctx, profile.currency, profile.language) });
+});
+
+/** Future Me, streamed as server-sent events: `text`, then `done` (or `error`). */
+app.post("/api/ai/future-me", async (c) => {
+  const uid = c.get("uid");
+  const req = await body(c.req.raw, FutureMeRequestSchema);
+  if (!req) return c.json({ error: "invalid_request" }, 400);
+  if (req.messages.filter((m) => m.role === "user").length > MAX_USER_TURNS) return c.json({ error: "conversation_over" }, 400);
+  const profile = await store.getProfile(uid);
+  if (!profile) return c.json({ error: "no_profile" }, 409);
+
+  const [wishlist, purchases] = await Promise.all([store.listWishlist(uid), store.monthPurchases(uid)]);
+  const summary = buildSummary(profile, wishlist, purchases);
+  let checked = null;
+  if (req.checked) {
+    const reality = buildReality(profile, wishlist, purchases, req.checked);
+    if (!reality) return c.json({ error: "unknown_pocket" }, 400);
+    checked = { name: req.checked.name, price: req.checked.price, reality };
+  }
+
+  return streamSSE(c, async (stream) => {
+    try {
+      for await (const event of futureMe({ profile, summary, checked, messages: req.messages })) {
+        await stream.writeSSE({ event: event.type, data: JSON.stringify(event) });
+      }
+    } catch (err) {
+      console.error("future-me failed:", err instanceof Error ? err.message : err);
+      await stream.writeSSE({ event: "error", data: JSON.stringify({ type: "error" }) });
+    }
+  });
+});
+
 
 app.onError((err, c) => {
   console.error(`${c.req.method} ${c.req.path} failed:`, err.message);

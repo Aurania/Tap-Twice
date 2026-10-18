@@ -76,7 +76,7 @@ describe("MockAiService.futureMeChat", () => {
   it("opens from a checked product with the server's numbers", async () => {
     const events = await collect(
       ai.futureMeChat(
-        { ...ctx, checked: { name: "New Balance Fresh Foam 680", emoji: "👟", price: 89.9, pocketName: "Fashion", status: "healthy", remainingAfter: 240.1, overBy: 0, displayWorkHours: 5, daysUntilRefill: 14 } },
+        { ...ctx, checked: { name: "New Balance Fresh Foam 680", emoji: "👟", price: 89.9, pocketId: "fashion", pocketName: "Fashion", status: "healthy", remainingAfter: 240.1, overBy: 0, displayWorkHours: 5, daysUntilRefill: 14 } },
         [],
       ),
     );
@@ -90,7 +90,7 @@ describe("MockAiService.futureMeChat", () => {
     const text = textOf(
       await collect(
         ai.futureMeChat(
-          { ...ctx, checked: { name: "Sneakers", emoji: "👟", price: 89.9, pocketName: "Fashion", status: "not_healthy", remainingAfter: -37.9, overBy: 37.9, displayWorkHours: 5, daysUntilRefill: 14 } },
+          { ...ctx, checked: { name: "Sneakers", emoji: "👟", price: 89.9, pocketId: "fashion", pocketName: "Fashion", status: "not_healthy", remainingAfter: -37.9, overBy: 37.9, displayWorkHours: 5, daysUntilRefill: 14 } },
           [],
         ),
       ),
@@ -110,7 +110,7 @@ describe("MockAiService.futureMeChat", () => {
     expect(events.at(-1)).toEqual({ type: "done", turnsLeft: MAX_USER_TURNS - 1 });
   });
   it("answers the quick replies from the numbers it was given", async () => {
-    const checked = { name: "Sneakers", emoji: "👟", price: 89.9, pocketName: "Fashion", status: "not_healthy" as const, remainingAfter: -37.9, overBy: 37.9, displayWorkHours: 5, daysUntilRefill: 14 };
+    const checked = { name: "Sneakers", emoji: "👟", price: 89.9, pocketId: "fashion", pocketName: "Fashion", status: "not_healthy" as const, remainingAfter: -37.9, overBy: 37.9, displayWorkHours: 5, daysUntilRefill: 14 };
     const turn = (text: string) => [{ role: "model" as const, text: "Hi" }, { role: "user" as const, text }];
     expect(textOf(await collect(ai.futureMeChat({ ...ctx, checked }, turn("Can it wait?"))))).toContain("refills in 14 days");
     expect(textOf(await collect(ai.futureMeChat({ ...ctx, checked }, turn("How did you get these numbers?"))))).toContain("income");
