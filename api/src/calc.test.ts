@@ -15,6 +15,7 @@ import {
   pocketRemaining,
   pocketWishlistPct,
   realityStatus,
+  remainingAfter,
   remainingAfterPct,
   round2,
   totalWishlistPct,
@@ -128,15 +129,22 @@ describe("realityStatus", () => {
   });
 });
 
-describe("remainingAfterPct", () => {
-  it("$330 → $240.10 leaves 73%", () => {
-    expect(remainingAfterPct(89.9, 330)).toBe(73);
+describe("remainingAfterPct and remainingAfter", () => {
+  it("$330 → $240.10 leaves 73% of the $330 budget (Figma Healthy card)", () => {
+    expect(remainingAfter(89.9, 330)).toBe(240.1);
+    expect(remainingAfterPct(89.9, 330, 330)).toBe(73);
+  });
+  it("is measured against the budget, not what was left", () => {
+    // 200 left of a 330 budget; after a 50 buy 150 is left = 45% of the budget.
+    expect(remainingAfterPct(50, 200, 330)).toBe(45);
   });
   it("is 0 when the price is more than what is left", () => {
-    expect(remainingAfterPct(89.9, 52)).toBe(0);
+    expect(remainingAfterPct(89.9, 52, 330)).toBe(0);
+    expect(remainingAfter(89.9, 52)).toBe(0);
   });
-  it("is null when nothing was left", () => {
-    expect(remainingAfterPct(89.9, 0)).toBeNull();
+  it("is 0 when nothing was left and null without a budget", () => {
+    expect(remainingAfterPct(89.9, 0, 330)).toBe(0);
+    expect(remainingAfterPct(89.9, 0, 0)).toBeNull();
   });
 });
 
