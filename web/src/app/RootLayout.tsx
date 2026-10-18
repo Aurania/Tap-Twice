@@ -27,7 +27,9 @@ export function RootLayout() {
               ? t("title.wishlist")
               : pathname.startsWith("/check")
                 ? t("title.check")
-                : t("app.name");
+                : pathname.startsWith("/settings")
+                  ? t("title.settings")
+                  : t("app.name");
   }, [pathname, t]);
 
   useEffect(() => {

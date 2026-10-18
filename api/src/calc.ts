@@ -76,6 +76,17 @@ export function remainingAfterPct(price: number, remaining: number, budget: numb
   return Math.max(0, Math.round(((remaining - price) / budget) * 100));
 }
 
+/** A purchase that fits still counts as "low" when less than this share of the pocket's budget is left after it. */
+export const LOW_POCKET_PCT = 20;
+
+/**
+ * True when a purchase fits but leaves the pocket low for the rest of the month (under LOW_POCKET_PCT of its budget).
+ * Not healthy and Pocket empty are their own statuses, so this is only ever true for Healthy.
+ */
+export function isLowAfter(status: RealityStatus, pctAfter: number | null): boolean {
+  return status === "healthy" && pctAfter !== null && pctAfter < LOW_POCKET_PCT;
+}
+
 /** What is left in the pocket after buying. Negative when the price is more than what is left (Figma "Fashion left −$37.90"). */
 export function remainingAfter(price: number, remaining: number): number {
   return round2(remaining - price);

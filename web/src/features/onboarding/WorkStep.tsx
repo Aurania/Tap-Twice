@@ -3,15 +3,16 @@ import { WEEKDAYS, type Weekday } from "@/api";
 import { useI18n } from "@/i18n/I18nProvider";
 import { cx } from "@/lib/cx";
 import { Button, ScrollPicker } from "@/ui";
-import { OnboardingHeader, OnboardingScreen, useOnboardingDraft, weeklyHours } from "./OnboardingLayout";
+import { OnboardingHeader, OnboardingScreen, useOnboardingDraft, useStepAction, weeklyHours } from "./OnboardingLayout";
 
-const HOURS = [6, 7, 8, 9, 10];
+const HOURS = [4, 5, 6, 7, 8, 9, 10];
 
-/** 01a-2 Work time: pick the days you work (default Mon–Fri) and scroll to set hours per day (6–10). */
+/** 01a-2 Work time: pick the days you work (default Mon–Fri) and scroll to set hours per day (4–10). */
 export function WorkStep() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { draft, update } = useOnboardingDraft();
+  const action = useStepAction(() => navigate("/onboarding/pockets"));
 
   const days = draft.workDays.length;
   const total = weeklyHours(draft.hoursPerDay, days);
@@ -74,8 +75,13 @@ export function WorkStep() {
           <p className="tt-small mt-1 text-ink-2">{t("onboarding.workWeekUse")}</p>
         </section>
 
-        <Button className="mt-auto" disabled={days === 0} onClick={() => navigate("/onboarding/pockets")}>
-          {t("common.next")}
+        {action.error && (
+          <p role="alert" className="tt-small text-center text-warn">
+            {t("onboarding.saveError")}
+          </p>
+        )}
+        <Button className="mt-auto" disabled={days === 0 || action.busy} onClick={action.run}>
+          {action.label}
         </Button>
       </div>
     </OnboardingScreen>

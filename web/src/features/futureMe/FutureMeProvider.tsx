@@ -64,11 +64,12 @@ function Nudge({ checked, open, onClose, onTalk }: { checked: CheckedProduct | n
       <ChatBubble from="model" tone="surface" className="max-w-full">
         {text}
       </ChatBubble>
+      {/* "Let's talk" on the right, as the main action. */}
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <Button onClick={onTalk}>{t("futureMe.nudgeYes")}</Button>
         <Button variant="secondary" onClick={onClose}>
           {t("futureMe.nudgeLater")}
         </Button>
+        <Button onClick={onTalk}>{t("futureMe.nudgeYes")}</Button>
       </div>
     </BottomSheet>
   );

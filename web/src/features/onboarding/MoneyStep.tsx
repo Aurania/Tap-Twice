@@ -6,14 +6,15 @@ import { formatMoney } from "@/lib/format";
 import { AmountField, Button, TextField } from "@/ui";
 import { ChevronDown } from "lucide-react";
 import { CurrencySheet, currencyFlag, currencyName } from "./CurrencySheet";
-import { OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./OnboardingLayout";
+import { OnboardingHeader, OnboardingScreen, useOnboardingDraft, useStepAction } from "./OnboardingLayout";
 import { useBudgetPreview } from "./useBudgetPreview";
 
 /** 01a-1 Money & income. Currency (default USD), income and expenses are required. N1 comes from the server's numbers. */
 export function MoneyStep() {
   const navigate = useNavigate();
   const { t, lang } = useI18n();
-  const { draft, update } = useOnboardingDraft();
+  const { draft, update, edit } = useOnboardingDraft();
+  const action = useStepAction(() => navigate("/onboarding/work"));
   const [currencyOpen, setCurrencyOpen] = useState(false);
 
   const income = parseAmount(draft.income, draft.currency, lang);
@@ -42,7 +43,7 @@ export function MoneyStep() {
         className="mt-6 flex flex-1 flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (canContinue) navigate("/onboarding/work");
+          if (canContinue && !action.busy) action.run();
         }}
       >
         <TextField
@@ -64,15 +65,17 @@ export function MoneyStep() {
             aria-labelledby="currency-label"
             aria-haspopup="dialog"
             onClick={() => setCurrencyOpen(true)}
-            className="tt-body-lg flex h-[52px] w-full items-center justify-between rounded-md border border-line bg-page px-4 text-left"
+            disabled={edit}
+            className="tt-body-lg flex h-[52px] w-full items-center justify-between rounded-md border border-line bg-page px-4 text-left disabled:bg-surface"
           >
             <span className="flex items-center gap-2">
               <span aria-hidden>{currencyFlag(draft.currency)}</span>
               {draft.currency} · {currencyName(draft.currency, lang)}
             </span>
-            <ChevronDown aria-hidden className="size-5 text-ink" />
+            {!edit && <ChevronDown aria-hidden className="size-5 text-ink" />}
           </button>
-          <p className="tt-small mt-1.5 text-ink-2">{t("onboarding.currencyHelp")}</p>
+          {/* Saved amounts (wishlist, purchases) are in this currency, so it is fixed after setup. */}
+          <p className="tt-small mt-1.5 text-ink-2">{edit ? t("settings.currencyFixed") : t("onboarding.currencyHelp")}</p>
         </div>
 
         <AmountField
@@ -99,8 +102,13 @@ export function MoneyStep() {
           </p>
         )}
 
-        <Button type="submit" className="mt-auto" disabled={!canContinue}>
-          {t("common.next")}
+        {action.error && (
+          <p role="alert" className="tt-small text-center text-warn">
+            {t("onboarding.saveError")}
+          </p>
+        )}
+        <Button type="submit" className="mt-auto" disabled={!canContinue || action.busy}>
+          {action.label}
         </Button>
       </form>
 

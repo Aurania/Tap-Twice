@@ -10,7 +10,6 @@ export { EmptyState } from "./EmptyState";
 export { FutureMeFab } from "./FutureMeFab";
 export { FutureMeRobot } from "./FutureMeRobot";
 export { ItemTile } from "./ItemTile";
-export { LanguageSwitch } from "./LanguageSwitch";
 export { Mark, MarkLabel } from "./Mark";
 export { AmountField } from "./AmountField";
 export { Notice } from "./Notice";

@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
-import type { ProfileV2 } from "@/api";
 import { useI18n } from "@/i18n/I18nProvider";
 import { parseAmount } from "@/lib/amount";
 import { formatMonthYear } from "@/lib/dates";
-import { useProfile } from "@/state/ProfileProvider";
 import { AmountField, Button, TextField } from "@/ui";
 import { ChevronDown } from "lucide-react";
 import { DateSheet } from "./DateSheet";
-import { OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./OnboardingLayout";
+import { draftToProfile, OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./OnboardingLayout";
 
 /**
  * 01b Goal. Still the v1 layout with v2 data: the goal is required, and the "Just spend less" segment and
@@ -18,47 +16,19 @@ import { OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./Onboar
 export function GoalStep() {
   const navigate = useNavigate();
   const { t, lang } = useI18n();
-  const { save } = useProfile();
-  const { draft, update } = useOnboardingDraft();
+  const { draft, update, edit, finish, saving, saveError } = useOnboardingDraft();
   const [dateOpen, setDateOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(false);
 
   const income = parseAmount(draft.income, draft.currency, lang);
   const expenses = parseAmount(draft.expenses, draft.currency, lang);
   if (income === null || expenses === null) return <Navigate to="/onboarding/money" replace />;
 
-  const target = parseAmount(draft.target, draft.currency, lang);
-  const canFinish = draft.goalName.trim().length > 0 && target !== null && target > 0 && draft.targetDate !== null;
-
-  const finish = async () => {
-    if (!canFinish || target === null || draft.targetDate === null) return;
-    const nickname = draft.nickname.trim();
-    const profile: ProfileV2 = {
-      ...(nickname ? { nickname } : {}),
-      currency: draft.currency,
-      monthlyIncome: income,
-      monthlyExpenses: expenses,
-      workDays: draft.workDays,
-      hoursPerDay: draft.hoursPerDay,
-      pockets: draft.pockets.map(({ id, name, allocationPct }) => ({ id, name, allocationPct })),
-      goal: { name: draft.goalName.trim(), targetAmount: target, savedAmount: parseAmount(draft.saved, draft.currency, lang) ?? 0, targetDate: draft.targetDate },
-      language: lang,
-    };
-    setSaving(true);
-    setError(false);
-    try {
-      await save(profile);
-      navigate("/home", { replace: true });
-    } catch {
-      setError(true);
-      setSaving(false);
-    }
-  };
+  // Saving sends the whole profile (draftToProfile); the server re-checks N1 and N2.
+  const canFinish = draftToProfile(draft) !== null;
 
   return (
     <OnboardingScreen>
-      <OnboardingHeader step={4} onBack={() => navigate("/onboarding/pockets")} showLanguage={false} />
+      <OnboardingHeader step={4} onBack={() => navigate("/onboarding/pockets")} />
       <h1 className="tt-h1 mt-4">{t("onboarding.goalTitle")}</h1>
       <p className="tt-body mt-2 text-ink-2">{t("onboarding.goalSub")}</p>
 
@@ -66,7 +36,7 @@ export function GoalStep() {
         className="mt-6 flex flex-1 flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          void finish();
+          if (canFinish) void finish();
         }}
       >
         <TextField
@@ -99,13 +69,13 @@ export function GoalStep() {
           </button>
         </div>
 
-        {error && (
+        {saveError && (
           <p role="alert" className="tt-small text-center text-warn">
             {t("onboarding.saveError")}
           </p>
         )}
         <Button type="submit" className="mt-auto" disabled={!canFinish || saving}>
-          {t("onboarding.finish")}
+          {edit ? t("common.save") : t("onboarding.finish")}
         </Button>
       </form>
 

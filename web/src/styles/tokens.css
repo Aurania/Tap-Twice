@@ -25,10 +25,10 @@
   --tt-color-pocket-travel: #4dd9cc;
   --tt-color-pocket-travel-ring: #4dd9cc;
 
-  /* Color · Future Me robot (v2). Body reuses highlight yellow, screen reuses navy (bg-inverse). */
+  /* Color · Future Me robot (v2). Body reuses highlight yellow; outline and screen use brand blue (action/primary). */
   --tt-color-robot-body: #ffd94d;
-  --tt-color-robot-outline: #0a0f33;
-  --tt-color-robot-screen: #0a0f33;
+  --tt-color-robot-outline: #3d5afe;
+  --tt-color-robot-screen: #3d5afe;
   --tt-color-robot-face: #ffd94d;
   --tt-color-robot-antenna: #ed5999;
 

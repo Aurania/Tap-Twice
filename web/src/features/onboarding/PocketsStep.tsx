@@ -1,23 +1,31 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router";
+import type { Currency } from "@/api";
 import { useI18n } from "@/i18n/I18nProvider";
-import { parseAmount } from "@/lib/amount";
+import { amountFormat, amountToInput, formatAmountInput, parseAmount } from "@/lib/amount";
 import { cx } from "@/lib/cx";
 import { formatMoney } from "@/lib/format";
-import { Button, PercentRing, pocketColor, pocketRingColor, PocketSlider } from "@/ui";
+import { Button, EditIcon, PercentRing, pocketColor, pocketRingColor, PocketSlider, useToast } from "@/ui";
 import { AddPocketSheet } from "./AddPocketSheet";
-import { MAX_POCKETS, OnboardingHeader, OnboardingScreen, useOnboardingDraft } from "./OnboardingLayout";
+import { MAX_POCKETS, OnboardingHeader, OnboardingScreen, useOnboardingDraft, useStepAction } from "./OnboardingLayout";
 import { useBudgetPreview } from "./useBudgetPreview";
 
+const WARN_EVERY_MS = 2500;
+
 /**
- * 01a-3 Pocket allocation. Sliders set each pocket's share of the leftover; every money amount and the
- * 100% check come from the server's preview. N2 (not 100%) turns the summary red and disables the button.
+ * 01a-3 Pocket allocation. Sliders (or a typed amount) set each pocket's share of the leftover. The total can never
+ * go past 100%: a slider stops at what is left, a typed amount is capped, and a toast says why. Every money amount
+ * and the final 100% check come from the server's preview. Any pocket, built-in or custom, can be renamed or removed.
  */
 export function PocketsStep() {
   const navigate = useNavigate();
+  const toast = useToast();
   const { t, lang } = useI18n();
-  const { draft, update } = useOnboardingDraft();
+  const { draft, update, edit } = useOnboardingDraft();
+  const action = useStepAction(() => navigate("/onboarding/goal"));
   const [addOpen, setAddOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const lastWarn = useRef(0);
 
   const income = parseAmount(draft.income, draft.currency, lang);
   const expenses = parseAmount(draft.expenses, draft.currency, lang);
@@ -35,16 +43,38 @@ export function PocketsStep() {
   const money = (n: number | undefined) => (n === undefined ? "–" : formatMoney(n, draft.currency, lang));
   const budgetOf = (id: string) => preview?.budgets.find((b) => b.id === id)?.budget;
   const canContinue = status === "ready" && preview?.valid === true && state === "ok";
+  const editing = draft.pockets.find((p) => p.id === editingId) ?? null;
 
-  const setPct = (id: string, allocationPct: number) =>
+  const warnMax = () => {
+    const now = Date.now();
+    if (now - lastWarn.current < WARN_EVERY_MS) return;
+    lastWarn.current = now;
+    toast({ message: t("onboarding.max100"), position: "bottom" });
+  };
+
+  /** Sets one pocket's share, capped so the total never goes above 100%. */
+  const setPct = (id: string, wanted: number) => {
+    const others = draft.pockets.reduce((sum, p) => (p.id === id ? sum : sum + p.allocationPct), 0);
+    const room = Math.max(0, 100 - others);
+    const allocationPct = Math.max(0, Math.min(wanted, room));
+    if (wanted > room) warnMax();
     update({ pockets: draft.pockets.map((p) => (p.id === id ? { ...p, allocationPct } : p)) });
-  const removePocket = (id: string) => update({ pockets: draft.pockets.filter((p) => p.id !== id) });
+  };
 
-  const headline = !preview
-    ? "–"
-    : state === "ok"
-      ? money(preview.leftover)
-      : money(Math.abs(preview.overAllocatedAmount));
+  /**
+   * A typed amount becomes the nearest whole percentage of the leftover (the server's number): a share, not money math.
+   * The amount shown afterwards is the server's budget for that percentage.
+   */
+  const setAmount = (id: string, amount: number) => {
+    const leftover = preview?.leftover ?? 0;
+    if (!(leftover > 0)) return;
+    setPct(id, Math.round((amount / leftover) * 100));
+  };
+
+  const removePocket = (id: string) => update({ pockets: draft.pockets.filter((p) => p.id !== id) });
+  const renamePocket = (id: string, name: string) => update({ pockets: draft.pockets.map((p) => (p.id === id ? { ...p, name } : p)) });
+
+  const headline = !preview ? "–" : state === "ok" ? money(preview.leftover) : money(Math.abs(preview.overAllocatedAmount));
 
   return (
     <OnboardingScreen>
@@ -68,8 +98,7 @@ export function PocketsStep() {
             {state === "over"
               ? t("onboarding.overAllocatedHelp", { pct: pctTotal })
               : state === "under"
-                ? /* TODO(design): the under-100% state is not designed; reuses the blue card with this hint. */
-                  t("onboarding.underAllocatedHelp", { pct: pctTotal })
+                ? t("onboarding.underAllocatedHelp", { pct: pctTotal })
                 : preview && t("onboarding.incomeMinusExpenses", { income: money(income), expenses: money(expenses) })}
           </p>
         </div>
@@ -81,21 +110,30 @@ export function PocketsStep() {
             <div className="flex items-center justify-between gap-2">
               <span className="tt-body-strong flex min-w-0 items-center gap-2 text-ink">
                 <span aria-hidden className="size-2.5 shrink-0 rounded-pill" style={{ background: pocketColor(p.id) }} />
-                <span className="truncate">{p.name}</span>
+                <span className="break-words">{p.name}</span>
               </span>
-              <span className="tt-body-strong shrink-0 text-ink">
-                {money(budgetOf(p.id))} · {p.allocationPct}%
-              </span>
+              <button
+                type="button"
+                onClick={() => setEditingId(p.id)}
+                aria-label={t("onboarding.pocketEdit", { name: p.name })}
+                className="-my-1 inline-flex size-9 shrink-0 items-center justify-center rounded-pill bg-surface text-ink"
+              >
+                <EditIcon aria-hidden className="size-4" />
+              </button>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <PocketAmount
+                currency={draft.currency}
+                budget={budgetOf(p.id)}
+                disabled={!preview || !(preview.leftover > 0)}
+                label={t("onboarding.pocketAmount", { name: p.name })}
+                onCommit={(amount) => setAmount(p.id, amount)}
+              />
+              <span className="tt-body-strong shrink-0 text-ink">{p.allocationPct}%</span>
             </div>
             <div className="mt-3">
               <PocketSlider value={p.allocationPct} onChange={(v) => setPct(p.id, v)} color={pocketRingColor(p.id)} label={t("onboarding.pocketAlloc", { name: p.name })} />
             </div>
-            {p.custom && (
-              <button type="button" onClick={() => removePocket(p.id)} className="tt-caption mt-2 text-link underline">
-                {/* TODO(design): removing a custom pocket is not designed; a plain text action so a mistake can be undone. */}
-                {t("onboarding.pocketRemove", { name: p.name })}
-              </button>
-            )}
           </li>
         ))}
       </ul>
@@ -112,8 +150,13 @@ export function PocketsStep() {
         {draft.pockets.length >= MAX_POCKETS && <p className="tt-small mt-1.5 text-ink-2">{t("onboarding.pocketLimit", { max: MAX_POCKETS })}</p>}
       </div>
 
-      <Button className="mt-5" disabled={!canContinue} onClick={() => navigate("/onboarding/goal")}>
-        {state === "ok" ? t("onboarding.looksGood") : t("onboarding.fixAllocation")}
+      {action.error && (
+        <p role="alert" className="tt-small mt-4 text-center text-warn">
+          {t("onboarding.saveError")}
+        </p>
+      )}
+      <Button className="mt-5" disabled={!canContinue || action.busy} onClick={action.run}>
+        {state !== "ok" ? t("onboarding.fixAllocation") : edit ? action.label : t("onboarding.looksGood")}
       </Button>
 
       <AddPocketSheet
@@ -122,7 +165,53 @@ export function PocketsStep() {
         taken={draft.pockets.map((p) => p.name.toLowerCase())}
         onAdd={(name) => update({ pockets: [...draft.pockets, { id: `custom-${Date.now().toString(36)}`, name, allocationPct: 0, custom: true }] })}
       />
+      <AddPocketSheet
+        open={editing !== null}
+        onClose={() => setEditingId(null)}
+        initialName={editing?.name ?? ""}
+        taken={draft.pockets.filter((p) => p.id !== editingId).map((p) => p.name.toLowerCase())}
+        onAdd={(name) => editingId && renamePocket(editingId, name)}
+        onRemove={() => editingId && removePocket(editingId)}
+        canRemove={draft.pockets.length > 1}
+      />
     </OnboardingScreen>
+  );
+}
+
+/**
+ * The pocket's monthly amount, typed directly. Shows the server's budget for the current share; while focused it is
+ * a plain amount input, and the typed value is applied on blur or Enter.
+ */
+function PocketAmount({ currency, budget, disabled, label, onCommit }: { currency: Currency; budget: number | undefined; disabled: boolean; label: string; onCommit: (amount: number) => void }) {
+  const { lang } = useI18n();
+  const [text, setText] = useState<string | null>(null);
+  const { symbol, decimals } = amountFormat(currency, lang);
+  const shown = text ?? (budget === undefined ? "" : amountToInput(budget, currency, lang));
+  const commit = () => {
+    if (text === null) return;
+    const amount = parseAmount(text, currency, lang);
+    setText(null);
+    if (amount !== null) onCommit(amount);
+  };
+  return (
+    <label className={cx("flex h-10 w-[160px] items-center gap-1.5 rounded-sm border bg-page px-3", disabled ? "border-line opacity-60" : "border-line focus-within:border-action")}>
+      <span className="tt-small shrink-0 text-ink-2">{symbol}</span>
+      <input
+        aria-label={label}
+        inputMode={decimals > 0 ? "decimal" : "numeric"}
+        autoComplete="off"
+        disabled={disabled}
+        value={shown}
+        placeholder="0"
+        onFocus={() => setText(shown)}
+        onChange={(e) => setText(formatAmountInput(e.target.value, currency, lang))}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+        className="tt-body-strong min-w-0 flex-1 bg-transparent text-ink outline-none"
+      />
+    </label>
   );
 }
 

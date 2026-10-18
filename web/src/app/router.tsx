@@ -6,7 +6,7 @@ import { RequireProfile } from "./RequireProfile";
 import { RootLayout } from "./RootLayout";
 
 /**
- * Routes. Sheets are not routes. Future Me and Settings come back in later v2 phases.
+ * Routes. Sheets are not routes.
  * Splash, Welcome and Home load up front; the rest load on demand (and are precached by the service worker).
  */
 const onboarding = () => import("@/features/onboarding");
@@ -44,6 +44,19 @@ export const router = createBrowserRouter([
           { path: "/check/problem", lazy: () => check().then((m) => ({ Component: m.Problem })) },
           { path: "/wishlist/real-cost", lazy: () => import("@/features/wishlist/RealCost").then((m) => ({ Component: m.RealCost })) },
           { path: "/wishlist", lazy: () => import("@/features/wishlist/Wishlist").then((m) => ({ Component: m.Wishlist })) },
+          { path: "/wishlist/pocket/:pocketId", lazy: () => import("@/features/wishlist/Wishlist").then((m) => ({ Component: m.Wishlist })) },
+          { path: "/settings", lazy: () => import("@/features/settings/Settings").then((m) => ({ Component: m.Settings })) },
+          {
+            // Settings reopens one onboarding screen, prefilled; "Save" comes back to Settings.
+            path: "/settings/edit",
+            lazy: () => onboarding().then((m) => ({ Component: m.EditProfileLayout })),
+            children: [
+              { path: "money", lazy: () => onboarding().then((m) => ({ Component: m.MoneyStep })) },
+              { path: "work", lazy: () => onboarding().then((m) => ({ Component: m.WorkStep })) },
+              { path: "pockets", lazy: () => onboarding().then((m) => ({ Component: m.PocketsStep })) },
+              { path: "goal", lazy: () => onboarding().then((m) => ({ Component: m.GoalStep })) },
+            ],
+          },
         ],
       },
       ...devRoutes,
