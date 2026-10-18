@@ -1,6 +1,8 @@
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { db } from "./firebase.js";
-import type { Profile, PurchaseInput, WishlistItemInput } from "./schemas.js";
+import type { PurchaseDoc } from "./purchase.js";
+import type { Profile, WishlistItemInput } from "./schemas.js";
+import { purchasesThisMonth } from "./purchase.js";
 import type { StoredPurchase, StoredWishlistItem } from "./summary.js";
 
 // Layout: users/{uid} holds the profile; wishlist and purchases are subcollections.
@@ -44,22 +46,24 @@ export async function deleteWishlistItem(uid: string, id: string) {
   await userDoc(uid).collection("wishlist").doc(id).delete();
 }
 
-export async function addPurchase(uid: string, purchase: PurchaseInput) {
-  const ref = await userDoc(uid).collection("purchases").add({ ...purchase, createdAt: Timestamp.now() });
+/** Stores a purchase plan; when it came from a wishlist item, that item is removed in the same write. */
+export async function addPurchase(uid: string, doc: PurchaseDoc, wishlistId?: string) {
+  const batch = db.batch();
+  const ref = userDoc(uid).collection("purchases").doc();
+  batch.set(ref, { ...doc, createdAt: Timestamp.now() });
+  if (wishlistId) batch.delete(userDoc(uid).collection("wishlist").doc(wishlistId));
+  await batch.commit();
   return ref.id;
 }
 
-/**
- * Start of the current calendar month in UTC.
- * TODO: the handoff does not say which timezone "this month" follows; v1 used Jakarta. Revisit with multi-currency.
- */
-function startOfMonth(now = new Date()) {
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-}
-
-export async function monthPurchases(uid: string): Promise<StoredPurchase[]> {
-  const snap = await userDoc(uid).collection("purchases").where("createdAt", ">=", Timestamp.fromDate(startOfMonth())).get();
-  return snap.docs.map((d) => ({ amount: d.data().amount, pocketId: d.data().pocketId }));
+/** What this month takes from each pocket: pay-in-full purchases from this month and every PayLater installment still running. */
+export async function monthPurchases(uid: string, now = new Date()): Promise<StoredPurchase[]> {
+  const snap = await userDoc(uid).collection("purchases").limit(500).get();
+  const docs = snap.docs
+    .map((d) => d.data())
+    .filter((d) => typeof d.startMonth === "string") // purchases from before PayLater plans had no schedule
+    .map((d) => ({ pocketId: d.pocketId as string, startMonth: d.startMonth as string, months: d.months as number, installment: d.installment as number, adminFee: (d.adminFee as number) ?? 0 }));
+  return purchasesThisMonth(docs, now);
 }
 
 export async function deleteAllUserData(uid: string) {

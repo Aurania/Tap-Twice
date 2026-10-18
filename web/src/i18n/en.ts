@@ -158,9 +158,9 @@ export const en = {
   "decide.saveForLater": "Save for later",
 
   "pay.title": "How are you paying?",
-  "pay.body": "We'll log it and update your joy budget right away.",
+  "pay.body": "We'll log it and update your {pocket} pocket right away.",
   "pay.inFull": "Pay in full",
-  "pay.inFullDetail": "Rp 0 extra · no due dates",
+  "pay.inFullDetail": "{extra} extra · no due dates",
   "pay.paylaterMonths": "PayLater, {n} months",
   "pay.paylaterDetail": "{monthly}/month · {rate}% fee",
   "pay.paylaterPick": "PayLater",
@@ -197,7 +197,7 @@ export const en = {
   "cart.titleManyNoMerchant": "{n} items",
 
   "paylater.whichTitle": "Which paylater?",
-  "paylater.whichBody": "Pick yours so we can use its plans. Rates differ per person, so we start from what your screenshot shows.",
+  "paylater.whichBody": "Pick yours so we can use its plans. Rates differ per person, so we start from typical rates.",
   "paylater.inScreenshot": "In your screenshot",
   "paylater.from": "From ~{rate}%/mo",
   "paylater.fromWithFee": "From ~{rate}%/mo + ~{fee}% service fee",
@@ -248,7 +248,7 @@ export const en = {
   "realcost.compare": "Pay in full compared with PayLater",
   "realcost.extraLine": "+{amount} in interest and fees",
   "realcost.debtFree": "Debt-free: {amount}/month × {n}",
-  "realcost.backToCart": "Back to my cart",
+  "realcost.backToCart": "Back to my wishlist",
   "source.screenshot": "from your screenshot",
   "source.typed": "your plan",
   "source.typical": "typical rate · check your app",
@@ -468,6 +468,9 @@ export const en = {
   "futureMe.nudgeEmpty": "You checked {name} ({price}). {pocket} is used up this month. Want to talk it through?",
   "futureMe.nudgeYes": "Let's talk",
   "futureMe.nudgeLater": "Maybe later",
+  "realcost.titleItem": "Same item.",
+  "realcost.use": "Use this plan",
+  "pay.logged": "Logged. Enjoy it! 🛍️",
   "field.counter": "{count}/{max}",
 } as const;
 

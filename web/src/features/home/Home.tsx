@@ -162,10 +162,10 @@ export function Home() {
           <Button variant="secondary" size="small" onClick={() => seedWishlist().then(load)}>
             Add the 5 sample wishlist items
           </Button>
-          <Button variant="secondary" size="small" onClick={() => api.addPurchase({ name: "Winter coat", amount: 278, pocketId: "fashion" }).then(load)}>
+          <Button variant="secondary" size="small" onClick={() => api.addPurchase({ name: "Winter coat", price: 278, pocketId: "fashion" }).then(load)}>
             Spend $278 in Fashion (Not healthy)
           </Button>
-          <Button variant="secondary" size="small" onClick={() => api.addPurchase({ name: "Winter coat", amount: 330, pocketId: "fashion" }).then(load)}>
+          <Button variant="secondary" size="small" onClick={() => api.addPurchase({ name: "Winter coat", price: 330, pocketId: "fashion" }).then(load)}>
             Spend $330 in Fashion (Pocket empty)
           </Button>
           <Button

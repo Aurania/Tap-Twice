@@ -5,7 +5,8 @@ import { logger } from "hono/logger";
 import type { z } from "zod";
 import { requireUser, type AuthEnv } from "./auth.js";
 import { config } from "./config.js";
-import { BudgetPreviewRequestSchema, CheckRequestSchema, ProfileSchema, PurchaseSchema, WishlistItemSchema } from "./schemas.js";
+import { planPurchase, quotePaylater } from "./purchase.js";
+import { BudgetPreviewRequestSchema, CheckRequestSchema, PaylaterCostRequestSchema, ProfileSchema, PurchaseSchema, WishlistItemSchema } from "./schemas.js";
 import * as store from "./store.js";
 import { buildBudgetPreview, buildReality, buildSummary } from "./summary.js";
 
@@ -68,15 +69,26 @@ app.delete("/api/wishlist/:id", async (c) => {
   return c.json({ ok: true });
 });
 
-// ---- Purchases (what actually reduces a pocket) ----
+// ---- Purchases ("Log it"): pay in full, or PayLater month by month ----
 app.post("/api/purchases", async (c) => {
   const uid = c.get("uid");
-  const purchase = await body(c.req.raw, PurchaseSchema);
-  if (!purchase) return c.json({ error: "invalid_purchase" }, 400);
+  const req = await body(c.req.raw, PurchaseSchema);
+  if (!req) return c.json({ error: "invalid_purchase" }, 400);
   const profile = await store.getProfile(uid);
   if (!profile) return c.json({ error: "no_profile" }, 409);
-  if (!profile.pockets.some((p) => p.id === purchase.pocketId)) return c.json({ error: "unknown_pocket" }, 400);
-  return c.json({ id: await store.addPurchase(uid, purchase) }, 201);
+  if (!profile.pockets.some((p) => p.id === req.pocketId)) return c.json({ error: "unknown_pocket" }, 400);
+  const doc = planPurchase(req, profile.currency);
+  return c.json({ id: await store.addPurchase(uid, doc, req.wishlistId), plan: doc }, 201);
+});
+
+// ---- PayLater numbers for a price, no side effects ----
+app.post("/api/paylater/cost", async (c) => {
+  const uid = c.get("uid");
+  const req = await body(c.req.raw, PaylaterCostRequestSchema);
+  if (!req) return c.json({ error: "invalid_paylater" }, 400);
+  const profile = await store.getProfile(uid);
+  if (!profile) return c.json({ error: "no_profile" }, 409);
+  return c.json({ plan: quotePaylater(req.price, req.paylater, profile.currency) });
 });
 
 // ---- Numbers the app displays: Home, Wishlist, Reality card ----
@@ -101,7 +113,6 @@ app.post("/api/check", async (c) => {
 });
 
 // TODO(phase 9): AI routes (identify product, read price, Future Me chat) once the provider is wired in.
-// TODO(phase 8): PayLater cost route on top of cost.ts.
 
 app.onError((err, c) => {
   console.error(`${c.req.method} ${c.req.path} failed:`, err.message);

@@ -38,6 +38,7 @@ export const router = createBrowserRouter([
       { path: "/check/match", lazy: () => check().then((m) => ({ Component: m.Match })) },
       { path: "/check/reality", lazy: () => check().then((m) => ({ Component: m.Reality })) },
       { path: "/check/problem", lazy: () => check().then((m) => ({ Component: m.Problem })) },
+      { path: "/wishlist/real-cost", lazy: () => import("@/features/wishlist/RealCost").then((m) => ({ Component: m.RealCost })) },
       { path: "/wishlist", lazy: () => import("@/features/wishlist/Wishlist").then((m) => ({ Component: m.Wishlist })) },
       ...devRoutes,
       { path: "*", element: <Navigate to="/" replace /> },

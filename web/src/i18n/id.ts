@@ -160,9 +160,9 @@ export const id: Record<StringKey, string> = {
   "decide.saveForLater": "Simpan dulu",
 
   "pay.title": "Bayarnya gimana?",
-  "pay.body": "Kami catat dan langsung perbarui budget senangmu.",
+  "pay.body": "Kami catat dan langsung perbarui pocket {pocket}-mu.",
   "pay.inFull": "Bayar penuh",
-  "pay.inFullDetail": "Tanpa biaya tambahan · tanpa jatuh tempo",
+  "pay.inFullDetail": "{extra} tambahan · tanpa jatuh tempo",
   "pay.paylaterMonths": "PayLater, {n} bulan",
   "pay.paylaterDetail": "{monthly}/bulan · bunga {rate}%",
   "pay.paylaterPick": "PayLater",
@@ -199,7 +199,7 @@ export const id: Record<StringKey, string> = {
   "cart.titleManyNoMerchant": "{n} barang",
 
   "paylater.whichTitle": "Paylater yang mana?",
-  "paylater.whichBody": "Pilih punyamu supaya kami pakai paketnya. Bunga beda tiap orang, jadi kami mulai dari yang ada di screenshot.",
+  "paylater.whichBody": "Pilih punyamu supaya kami pakai plan-nya. Bunga beda tiap orang, jadi kami mulai dari bunga umum.",
   "paylater.inScreenshot": "Ada di screenshot",
   "paylater.from": "Mulai ~{rate}%/bln",
   "paylater.fromWithFee": "Mulai ~{rate}%/bln + biaya layanan ~{fee}%",
@@ -250,7 +250,7 @@ export const id: Record<StringKey, string> = {
   "realcost.compare": "Bayar penuh dibandingkan PayLater",
   "realcost.extraLine": "+{amount} bunga dan biaya",
   "realcost.debtFree": "Bebas utang: {amount}/bulan × {n}",
-  "realcost.backToCart": "Kembali ke keranjang",
+  "realcost.backToCart": "Kembali ke wishlist",
   "source.screenshot": "dari screenshot",
   "source.typed": "paketmu",
   "source.typical": "bunga umum · cek aplikasinya",
@@ -470,5 +470,8 @@ export const id: Record<StringKey, string> = {
   "futureMe.nudgeEmpty": "Kamu mengecek {name} ({price}). {pocket} sudah habis bulan ini. Mau ngobrol dulu?",
   "futureMe.nudgeYes": "Ayo ngobrol",
   "futureMe.nudgeLater": "Nanti saja",
+  "realcost.titleItem": "Barang yang sama.",
+  "realcost.use": "Pakai plan ini",
+  "pay.logged": "Tercatat. Selamat menikmati! 🛍️",
   "field.counter": "{count}/{max}",
 };
