@@ -60,3 +60,19 @@ Source of truth for v2: `tap-twice-v2-handoff.md` + decisions in the chat (below
 - **Existing data.** v1 profiles in Firestore have a different shape. Treat v1 profiles as "no profile" (user re-onboards) rather than migrating. Confirm if needed.
 - **Figma.** Access approved for file `kmYlp9f09qqYhHwaVReJLW`; reads are limited (Starter plan), so I check only key frames per phase.
 - **Design TODOs (md §12, not implemented silently):** goal screen redesign (#2), robot covering "Check a product" (#4), 6-month projection (#6), Figma prototype (#1), Future Me entry placement on Reality card.
+
+## Phase 1–3 log
+
+- **Math lives on the server** (decision after phase 0): `api/src/calc.ts` (pure rules) and `api/src/summary.ts` (Home, Wishlist and Reality numbers), both unit-tested with the consistent seed. The web only formats and displays. `web/CLAUDE.md` rule 1 stays.
+- **Figma check (robot `2026:3354`, Healthy `2026:2223`):** robot matches. Verdict card was rebuilt to the frame: tinted card, check badge, label row, status-colored bar. Finding: "73% after this buy" is measured against the pocket **budget** (`(remaining − price) / budget`), not what was left. `remainingAfterPct` now takes the budget.
+- **API after phase 3:** `GET/PUT /api/profile` (N1 and N2 are validated here), `DELETE /api/me`, `GET /api/summary`, `POST /api/check` (includes the N10 duplicate id), `POST /api/wishlist`, `DELETE /api/wishlist/:id`, `POST /api/purchases`. Removed: cart extract, reflect, cost, decisions, Future Me v1, `fx.ts`, `scripts/test-api.mjs`. The README API table is out of date until phase 10.
+- **v1 profiles** are treated as "no profile" (re-onboard), no migration.
+- **Web:** `api/v2.ts` (types and client, sits beside v1 until the v1 screens are replaced), `services/ai/` (`AiService`, `MockAiService` with a scenario switch for N4, N5, N6 and 07e, `GeminiAiService` stub that fails loudly). `vitest` added to `web/`.
+- **Mock limits:** English copy only; the mock's price is always $89.90 (sample data).
+
+### Open items to decide
+
+1. **How does a purchase get recorded?** v2 removed "Buy it", but pocket remaining depends on actual purchases (this is the only way to get the $52 "Not healthy" case). The endpoint exists (`POST /api/purchases`). Proposal: completing the wishlist item's "How are you paying?" flow (05e, pay in full or PayLater) records the purchase. **Needs your confirmation before phase 8.**
+2. **"This month" timezone** is UTC for now (v1 used Jakarta). Per-profile timezone is not in the handoff.
+3. **PayLater rounding:** `paylaterCost` still defaults to whole units; phase 8 passes the currency's decimals.
+4. **Pocket empty card** color/layout (`2026:2979`) is checked in phase 6; red until then.

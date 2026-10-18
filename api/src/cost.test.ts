@@ -1,24 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateCost, hourlyRate, impliedMonthlyRatePct, paylaterCost, type CostProfile } from "./cost.js";
-
-const now = new Date("2026-10-16T12:00:00+07:00");
-
-const dinda: CostProfile = {
-  monthlyIncome: 6_000_000,
-  hoursPerWeek: 45,
-  joyBudget: 600_000,
-  goal: { name: "Concert in Singapore", targetAmount: 8_000_000, savedAmount: 2_000_000, targetDate: "2027-07-16" },
-};
-
-describe("hourlyRate", () => {
-  it("divides income by monthly hours", () => {
-    expect(hourlyRate(6_000_000, 45)).toBeCloseTo(30_792.9, 1);
-  });
-  it("is zero for missing inputs", () => {
-    expect(hourlyRate(0, 45)).toBe(0);
-    expect(hourlyRate(6_000_000, 0)).toBe(0);
-  });
-});
+import { impliedMonthlyRatePct, paylaterCost } from "./cost.js";
 
 // Five reference scenarios. Expected values are worked by hand with the PRD formula:
 // installment = price / tenor + price * rate; total = installment * tenor + admin.
@@ -47,43 +28,11 @@ describe("impliedMonthlyRatePct", () => {
   });
 });
 
-describe("calculateCost", () => {
-  it("builds the reality card numbers", () => {
-    const r = calculateCost({ total: 450_000, profile: dinda, spentThisMonth: 150_000, now });
-    expect(r.hoursOfWork).toBe(14.6);
-    expect(r.goal.monthlySaving).toBe(666_667);
-    expect(r.goal.delayDays).toBe(20.3);
-    expect(r.joy.leftBefore).toBe(450_000);
-    expect(r.joy.leftAfter).toBe(0);
-    expect(r.joy.usedPct).toBe(100);
-    expect(r.paylater).toBeNull();
-  });
-
-  it("returns null goal delay when the goal is already reached", () => {
-    const r = calculateCost({
-      total: 100_000,
-      profile: { ...dinda, goal: { ...dinda.goal, savedAmount: 8_000_000 } },
-      spentThisMonth: 0,
-      now,
-    });
-    expect(r.goal.delayDays).toBeNull();
-  });
-
-  it("returns null joy share when the budget is already used up", () => {
-    const r = calculateCost({ total: 100_000, profile: dinda, spentThisMonth: 700_000, now });
-    expect(r.joy.usedPct).toBeNull();
-    expect(r.joy.leftAfter).toBe(-200_000);
-  });
-
-  it("includes paylater when terms are given", () => {
-    const r = calculateCost({
-      total: 450_000,
-      profile: dinda,
-      spentThisMonth: 0,
-      paylater: { tenorMonths: 6, monthlyRatePct: 2.95, adminFee: 0, lateFee: 50_000 },
-      now,
-    });
-    expect(r.paylater?.totalPaid).toBe(529_650);
-    expect(r.paylater?.lateFee).toBe(50_000);
+describe("paylaterCost with cents", () => {
+  it("keeps 2 decimals when asked", () => {
+    const r = paylaterCost(89.9, { tenorMonths: 3, monthlyRatePct: 2, adminFee: 1.5 }, 2);
+    expect(r.monthlyInstallment).toBe(31.76);
+    expect(r.totalPaid).toBe(96.79);
+    expect(r.extraCost).toBe(6.89);
   });
 });

@@ -1,30 +1,41 @@
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import type { z } from "zod";
-import { jakartaDate } from "./cost.js";
 import { db } from "./firebase.js";
-import type { DecisionSchema, Profile, WishlistItemSchema } from "./schemas.js";
+import type { Profile, PurchaseInput, WishlistItemInput } from "./schemas.js";
+import type { StoredPurchase, StoredWishlistItem } from "./summary.js";
 
-// Layout: users/{uid} holds the profile; wishlist and decisions are subcollections.
+// Layout: users/{uid} holds the profile; wishlist and purchases are subcollections.
 const userDoc = (uid: string) => db.collection("users").doc(uid);
+
+/**
+ * v1 profiles (rupiah-only, joy budget) have a different shape. A stored profile that does not
+ * look like v2 is treated as "no profile" so the user onboards again. No migration.
+ */
+function isV2(profile: unknown): profile is Profile {
+  const p = profile as Partial<Profile> | undefined;
+  return Boolean(p && Array.isArray(p.pockets) && typeof p.currency === "string" && typeof p.monthlyExpenses === "number");
+}
 
 export async function getProfile(uid: string): Promise<Profile | null> {
   const snap = await userDoc(uid).get();
-  return (snap.data()?.profile as Profile | undefined) ?? null;
+  const profile = snap.data()?.profile;
+  return isV2(profile) ? profile : null;
 }
 
 export async function saveProfile(uid: string, profile: Profile) {
   await userDoc(uid).set({ profile, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
 }
 
-export async function listWishlist(uid: string) {
-  const snap = await userDoc(uid).collection("wishlist").orderBy("createdAt", "desc").limit(50).get();
-  return snap.docs.map((d) => {
-    const data = d.data();
-    return { id: d.id, name: data.name, price: data.price, merchant: data.merchant ?? null, createdAt: toIso(data.createdAt) };
-  });
+export async function listWishlist(uid: string): Promise<StoredWishlistItem[]> {
+  const snap = await userDoc(uid).collection("wishlist").orderBy("createdAt", "desc").limit(200).get();
+  return snap.docs
+    .map((d) => {
+      const data = d.data();
+      return { id: d.id, name: data.name, price: data.price, pocketId: data.pocketId, createdAt: toIso(data.createdAt) };
+    })
+    .filter((w) => typeof w.pocketId === "string"); // v1 items had no pocket
 }
 
-export async function addWishlistItem(uid: string, item: z.infer<typeof WishlistItemSchema>) {
+export async function addWishlistItem(uid: string, item: WishlistItemInput) {
   const ref = await userDoc(uid).collection("wishlist").add({ ...item, createdAt: Timestamp.now() });
   return ref.id;
 }
@@ -33,32 +44,22 @@ export async function deleteWishlistItem(uid: string, id: string) {
   await userDoc(uid).collection("wishlist").doc(id).delete();
 }
 
-export async function addDecision(uid: string, decision: z.infer<typeof DecisionSchema>) {
-  const ref = await userDoc(uid).collection("decisions").add({ ...decision, createdAt: Timestamp.now() });
+export async function addPurchase(uid: string, purchase: PurchaseInput) {
+  const ref = await userDoc(uid).collection("purchases").add({ ...purchase, createdAt: Timestamp.now() });
   return ref.id;
 }
 
-/** Start of the current calendar month in Jakarta (UTC+7). */
-function startOfJakartaMonth(now = new Date()) {
-  const [y, m] = jakartaDate(now);
-  return new Date(Date.UTC(y, m - 1, 1) - 7 * 60 * 60 * 1000);
+/**
+ * Start of the current calendar month in UTC.
+ * TODO: the handoff does not say which timezone "this month" follows; v1 used Jakarta. Revisit with multi-currency.
+ */
+function startOfMonth(now = new Date()) {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 }
 
-export async function monthDecisions(uid: string) {
-  const snap = await userDoc(uid)
-    .collection("decisions")
-    .where("createdAt", ">=", Timestamp.fromDate(startOfJakartaMonth()))
-    .get();
-  return snap.docs.map((d) => {
-    const data = d.data();
-    return { id: d.id, action: data.action, title: data.title, total: data.total, createdAt: toIso(data.createdAt) };
-  });
-}
-
-/** Sum of purchases marked "Buy" this month; this is what the joy budget is spent against. */
-export async function spentThisMonth(uid: string) {
-  const decisions = await monthDecisions(uid);
-  return decisions.filter((d) => d.action === "buy").reduce((sum, d) => sum + d.total, 0);
+export async function monthPurchases(uid: string): Promise<StoredPurchase[]> {
+  const snap = await userDoc(uid).collection("purchases").where("createdAt", ">=", Timestamp.fromDate(startOfMonth())).get();
+  return snap.docs.map((d) => ({ amount: d.data().amount, pocketId: d.data().pocketId }));
 }
 
 export async function deleteAllUserData(uid: string) {

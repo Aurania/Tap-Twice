@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { api } from "@/api";
 import { ensureUser } from "@/auth/firebase";
 import { useI18n } from "@/i18n/I18nProvider";
+import { getMockScenario, MOCK_SCENARIOS, setMockScenario, type MockScenario } from "@/services/ai";
 import { formatIDR, formatIDRCompact, formatIDRSigned } from "@/lib/format";
 import {
   BagIcon,
@@ -322,6 +323,7 @@ function V2Components() {
   const [hours, setHours] = useState(8);
   const [pocket, setPocket] = useState("fashion");
   const [dialog, setDialog] = useState(false);
+  const [scenario, setScenario] = useState<MockScenario>(getMockScenario());
   const pockets = [
     { id: "fashion", name: "Fashion", pct: 47 },
     { id: "gadgets", name: "Gadgets", pct: 54 },
@@ -386,6 +388,23 @@ function V2Components() {
           <Verdict status="not_healthy" title="Not healthy" subtitle="Fashion would be over by $37.90" barLabel="Fashion pocket" barValue="$52 left of $330" barPct={0} />
           <Verdict status="pocket_empty" title="Pocket empty" subtitle="Nothing left in Fashion this month" barLabel="Fashion pocket" barValue="$0 left of $330" barPct={0} />
         </div>
+      </Section>
+      <Section title="v2 · AI mock scenario (drives the negative cases)">
+        <div className="flex flex-wrap gap-2">
+          {MOCK_SCENARIOS.map((m) => (
+            <ChoiceChip
+              key={m}
+              selected={scenario === m}
+              onClick={() => {
+                setMockScenario(m);
+                setScenario(m);
+              }}
+            >
+              {m}
+            </ChoiceChip>
+          ))}
+        </div>
+        <p className="tt-small mt-2 text-ink-2">Applies to identify, price and Future Me until you pick "ok" again.</p>
       </Section>
       <Section title="v2 · Dialog and empty state">
         <Button size="small" variant="secondary" onClick={() => setDialog(true)}>Open dialog</Button>
