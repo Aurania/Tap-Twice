@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { MockAiService, setMockScenario } from "./mock";
-import { AiError, MAX_USER_TURNS, type FutureMeContext, type FutureMeEvent, type PocketOption } from "./types";
+import { AiError, MAX_USER_TURNS, type FutureMeContext, type FutureMeEvent, type PocketOption, type ReflectContext } from "./types";
 
 const ai = new MockAiService(0);
 const pockets: PocketOption[] = [
@@ -123,5 +123,38 @@ describe("MockAiService.futureMeChat", () => {
     const run = collect(slow.futureMeChat(ctx, [], ctrl.signal));
     ctrl.abort();
     await expect(run).rejects.toMatchObject({ name: "AbortError" });
+  });
+});
+
+describe("MockAiService.reflect", () => {
+  const base: ReflectContext = {
+    currency: "USD",
+    productName: "New Balance Fresh Foam 680",
+    pocketName: "Fashion",
+    status: "healthy",
+    price: 89.9,
+    remaining: 330,
+    remainingAfter: 240.1,
+    overBy: 0,
+    displayWorkHours: 5,
+    daysUntilRefill: 14,
+    refillDate: "2026-11-01",
+  };
+  it("healthy: mentions what is left after", async () => {
+    expect(await ai.reflect(base)).toContain("$240.10");
+  });
+  it("not healthy: says how far over and the days to the refill", async () => {
+    const text = await ai.reflect({ ...base, status: "not_healthy", remaining: 52, remainingAfter: -37.9, overBy: 37.9 });
+    expect(text).toContain("$52");
+    expect(text).toContain("$37.90 over");
+    expect(text).toContain("14 days");
+  });
+  it("pocket empty: says until when", async () => {
+    const text = await ai.reflect({ ...base, status: "pocket_empty", remaining: 0, remainingAfter: 0, overBy: 89.9 });
+    expect(text).toContain("$0 until Nov 1");
+  });
+  it("is null when the AI cannot be reached", async () => {
+    setMockScenario("offline");
+    expect(await ai.reflect(base)).toBeNull();
   });
 });

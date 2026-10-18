@@ -4,7 +4,7 @@ import { api, type Summary } from "@/api";
 import { useI18n } from "@/i18n/I18nProvider";
 import { formatMoney } from "@/lib/format";
 import { useProfile } from "@/state/ProfileProvider";
-import { BackIcon, Button, CircleButton, EmptyState, FutureMeRobot, ItemTile, PercentRing, PocketBar, pocketColor, useToast } from "@/ui";
+import { BackIcon, Button, CircleButton, EmptyState, FutureMeRobot, ItemTile, PercentRing, PocketBar, pocketColor } from "@/ui";
 
 /**
  * 06 Wishlist by pocket, and N9 when it is empty. Summary card, then one card per pocket that has items.
@@ -13,7 +13,6 @@ import { BackIcon, Button, CircleButton, EmptyState, FutureMeRobot, ItemTile, Pe
  */
 export function Wishlist() {
   const navigate = useNavigate();
-  const toast = useToast();
   const { t, lang } = useI18n();
   const { state, profile } = useProfile();
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -49,8 +48,7 @@ export function Wishlist() {
           art={<FutureMeRobot size={96} />}
           title={t("wishlist.emptyTitle")}
           description={t("wishlist.emptyBody")}
-          // TODO(phase 6): opens the Check the stuff flow.
-          action={<Button onClick={() => toast({ message: "Check the stuff arrives in the next phase." })}>{t("wishlist.emptyCta")}</Button>}
+          action={<Button onClick={() => navigate("/check")}>{t("wishlist.emptyCta")}</Button>}
         />
       )}
 
@@ -99,7 +97,7 @@ export function Wishlist() {
                       .reverse()
                       .map((it) => (
                         <li key={it.id} className="flex items-center gap-3">
-                          <ItemTile emoji={it.emoji} className="size-8" />
+                          <ItemTile emoji={it.emoji} size="sm" />
                           <span className="tt-body min-w-0 flex-1 text-ink">{it.name}</span>
                           <span className="tt-small shrink-0 text-ink-2">{t("wishlist.itemLine", { price: money(it.price), pct: it.pocketPct ?? 0 })}</span>
                         </li>

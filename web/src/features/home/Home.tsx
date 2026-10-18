@@ -66,7 +66,7 @@ export function Home() {
         ? t(count === 1 ? "home.subRoomOne" : "home.subRoomMany", { pocket: roomy, count })
         : t(count === 1 ? "home.subWishlistOne" : "home.subWishlistMany", { count });
 
-  const soon = (what: string) => toast({ message: `${what} arrives in the next phase.` }); // TODO(phase 6/7): replace with the real screens
+  const soon = (what: string) => toast({ message: `${what} arrives in the next phase.` }); // TODO(phase 7): the Future Me chat
 
   return (
     <main className="flex flex-1 flex-col bg-page px-5 pt-[max(12px,env(safe-area-inset-top))] pb-[max(120px,env(safe-area-inset-bottom))]">
@@ -116,7 +116,7 @@ export function Home() {
               <Chip tone="highlight">{t("home.startHere")}</Chip>
               <h2 className="tt-h1 mt-3 max-w-[200px]">{t("home.ctaTitle")}</h2>
               <p className="tt-body mt-2 max-w-[280px] text-white/90">{t("home.ctaBody")}</p>
-              <Button variant="secondary" className="mt-5" onClick={() => soon("Check the stuff")}>
+              <Button variant="secondary" className="mt-5" onClick={() => navigate("/check")}>
                 {t("home.ctaButton")}
               </Button>
             </div>
@@ -163,6 +163,12 @@ export function Home() {
           <p className="tt-caption text-ink-2">Dev only</p>
           <Button variant="secondary" size="small" onClick={() => seedWishlist().then(load)}>
             Add the 5 sample wishlist items
+          </Button>
+          <Button variant="secondary" size="small" onClick={() => api.addPurchase({ name: "Winter coat", amount: 278, pocketId: "fashion" }).then(load)}>
+            Spend $278 in Fashion (Not healthy)
+          </Button>
+          <Button variant="secondary" size="small" onClick={() => api.addPurchase({ name: "Winter coat", amount: 330, pocketId: "fashion" }).then(load)}>
+            Spend $330 in Fashion (Pocket empty)
           </Button>
           <Button
             variant="secondary"

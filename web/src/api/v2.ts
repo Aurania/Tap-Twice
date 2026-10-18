@@ -71,10 +71,16 @@ export type Reality = {
   displayWorkHours: number;
   pctOfIncome: number;
   pocket: { id: string; name: string; budget: number; remaining: number };
+  /** "Fashion left" stat: after buying; negative when over; 0 when the pocket was already empty. */
   remainingAfter: number;
   remainingAfterPct: number | null;
-  /** Id of the same product already on the wishlist (N10). */
+  overBy: number;
+  /** First day of next month, "YYYY-MM-DD". */
+  refillDate: string;
+  daysUntilRefill: number;
+  /** Id of the same product already in this pocket's wishlist (N10), and when it was added. */
   duplicateOf: string | null;
+  duplicateAddedAt: string | null;
 };
 
 export type BudgetPreviewInput = { monthlyIncome: number; monthlyExpenses: number; pockets: { id: string; allocationPct: number }[] };

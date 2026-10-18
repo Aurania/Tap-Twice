@@ -76,9 +76,26 @@ export function remainingAfterPct(price: number, remaining: number, budget: numb
   return Math.max(0, Math.round(((remaining - price) / budget) * 100));
 }
 
-/** What is left in the pocket after buying, never below 0 (the "Fashion left" stat). */
+/** What is left in the pocket after buying. Negative when the price is more than what is left (Figma "Fashion left −$37.90"). */
 export function remainingAfter(price: number, remaining: number): number {
-  return Math.max(0, round2(remaining - price));
+  return round2(remaining - price);
+}
+
+/** How much a price goes over what is left in the pocket; 0 when it fits. */
+export function overBy(price: number, remaining: number): number {
+  return Math.max(0, round2(price - remaining));
+}
+
+const DAY_MS = 86_400_000;
+
+/** First moment of next month, UTC. Pockets refill then. TODO: timezone (see store.ts). */
+export function nextRefill(now: Date): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+}
+
+/** Whole days until the refill, rounded up ("Wait 14 days for the refill?" on Oct 18). */
+export function daysUntilRefill(now: Date): number {
+  return Math.ceil((nextRefill(now).getTime() - now.getTime()) / DAY_MS);
 }
 
 /**

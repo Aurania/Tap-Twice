@@ -5,13 +5,16 @@ import {
   allocationTotal,
   displayWorkHours,
   goalProgressPct,
+  daysUntilRefill,
   goalTone,
   hourlyRate,
   hasRoomForPockets,
   isAllocationValid,
   itemPocketPct,
   leftover,
+  nextRefill,
   overAllocatedBy,
+  overBy,
   pctOfIncome,
   pocketBudget,
   pocketRemaining,
@@ -141,32 +144,46 @@ export interface Reality {
   displayWorkHours: number;
   pctOfIncome: number;
   pocket: { id: string; name: string; budget: number; remaining: number };
+  /** The "Fashion left" stat: what remains after buying (negative when over; 0 when the pocket was already empty). */
   remainingAfter: number;
   /** Left in the pocket after buying, as a % of its budget (the bar). */
   remainingAfterPct: number | null;
-  /** The same product (by name) already sits on the wishlist: N10. */
+  /** How far the price goes over what is left ("Pushes Fashion $37.90 over budget"); 0 when it fits. */
+  overBy: number;
+  /** When the pocket refills: the first day of next month, "YYYY-MM-DD". */
+  refillDate: string;
+  /** Whole days until then. */
+  daysUntilRefill: number;
+  /** The same product (by name) already sits in this pocket's wishlist: N10. */
   duplicateOf: string | null;
+  /** ISO time that duplicate was added ("You added it on Oct 12"). */
+  duplicateAddedAt: string | null;
 }
 
 const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
 
 /** Null when the pocket does not exist. */
-export function buildReality(profile: Profile, wishlist: StoredWishlistItem[], purchases: StoredPurchase[], req: CheckRequest): Reality | null {
+export function buildReality(profile: Profile, wishlist: StoredWishlistItem[], purchases: StoredPurchase[], req: CheckRequest, now = new Date()): Reality | null {
   const pocket = buildPockets(profile, wishlist, purchases).find((p) => p.id === req.pocketId);
   if (!pocket) return null;
   const rate = rateFor(profile);
   const hours = workHours(req.price, rate);
   const duplicate = wishlist.find((w) => w.pocketId === req.pocketId && normalize(w.name) === normalize(req.name));
+  const status = realityStatus(req.price, pocket.remaining);
   return {
-    status: realityStatus(req.price, pocket.remaining),
+    status,
     hourlyRate: rate,
     workHours: round2(hours),
     displayWorkHours: displayWorkHours(hours),
     pctOfIncome: pctOfIncome(req.price, profile.monthlyIncome),
     pocket: { id: pocket.id, name: pocket.name, budget: pocket.budget, remaining: pocket.remaining },
-    remainingAfter: remainingAfter(req.price, pocket.remaining),
+    remainingAfter: status === "pocket_empty" ? 0 : remainingAfter(req.price, pocket.remaining),
     remainingAfterPct: remainingAfterPct(req.price, pocket.remaining, pocket.budget),
+    overBy: status === "pocket_empty" ? req.price : overBy(req.price, pocket.remaining),
+    refillDate: nextRefill(now).toISOString().slice(0, 10),
+    daysUntilRefill: daysUntilRefill(now),
     duplicateOf: duplicate?.id ?? null,
+    duplicateAddedAt: duplicate?.createdAt ?? null,
   };
 }
 

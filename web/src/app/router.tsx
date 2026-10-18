@@ -5,10 +5,11 @@ import { Welcome } from "@/features/welcome/Welcome";
 import { RootLayout } from "./RootLayout";
 
 /**
- * Routes. Sheets are not routes. Check, Future Me and Settings come back in later v2 phases.
+ * Routes. Sheets are not routes. Future Me and Settings come back in later v2 phases.
  * Splash, Welcome and Home load up front; the rest load on demand (and are precached by the service worker).
  */
 const onboarding = () => import("@/features/onboarding");
+const check = () => import("@/features/check");
 
 const devRoutes: RouteObject[] = import.meta.env.DEV
   ? [{ path: "/dev/components", lazy: () => import("@/features/dev/ComponentsPage").then((m) => ({ Component: m.ComponentsPage })) }]
@@ -32,6 +33,11 @@ export const router = createBrowserRouter([
         ],
       },
       { path: "/home", element: <Home /> },
+      { path: "/check", lazy: () => check().then((m) => ({ Component: m.Snap })) },
+      { path: "/check/reading", lazy: () => check().then((m) => ({ Component: m.Reading })) },
+      { path: "/check/match", lazy: () => check().then((m) => ({ Component: m.Match })) },
+      { path: "/check/reality", lazy: () => check().then((m) => ({ Component: m.Reality })) },
+      { path: "/check/problem", lazy: () => check().then((m) => ({ Component: m.Problem })) },
       { path: "/wishlist", lazy: () => import("@/features/wishlist/Wishlist").then((m) => ({ Component: m.Wishlist })) },
       ...devRoutes,
       { path: "*", element: <Navigate to="/" replace /> },

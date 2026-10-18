@@ -108,11 +108,19 @@ describe("buildReality (the New Balance shoes, $89.90 in Fashion)", () => {
   });
   it("not healthy with $52 left", () => {
     const r = buildReality(profile, wishlist, purchasesFor("stretched"), check)!;
-    expect(r).toMatchObject({ status: "not_healthy", remainingAfter: 0, remainingAfterPct: 0, pocket: { remaining: 52 } });
+    expect(r).toMatchObject({ status: "not_healthy", remainingAfter: -37.9, remainingAfterPct: 0, overBy: 37.9, pocket: { remaining: 52 } });
   });
   it("N7: pocket empty with $0 left", () => {
     const r = buildReality(profile, wishlist, purchasesFor("empty"), check)!;
-    expect(r.status).toBe("pocket_empty");
+    expect(r).toMatchObject({ status: "pocket_empty", remainingAfter: 0, overBy: 89.9 });
+  });
+  it("tells when the pocket refills (Oct 18 → Nov 1, 14 days)", () => {
+    const r = buildReality(profile, wishlist, [], check, new Date("2026-10-18T12:00:00Z"))!;
+    expect(r).toMatchObject({ refillDate: "2026-11-01", daysUntilRefill: 14 });
+  });
+  it("N10: gives the date the duplicate was added", () => {
+    const dated = wishlist.map((w) => (w.id === "w1" ? { ...w, createdAt: "2026-10-12T09:00:00.000Z" } : w));
+    expect(buildReality(profile, dated, [], check)!.duplicateAddedAt).toBe("2026-10-12T09:00:00.000Z");
   });
   it("N10: finds the same product already on the wishlist, ignoring case and spacing", () => {
     const r = buildReality(profile, wishlist, [], { ...check, name: "  new balance  FRESH foam 680 " })!;

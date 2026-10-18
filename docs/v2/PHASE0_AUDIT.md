@@ -111,3 +111,14 @@ Source of truth for v2: `tap-twice-v2-handoff.md` + decisions in the chat (below
   - The floating robot's tooltip is always visible and covers part of the Check card (handoff §12 #4).
 - **Left out because the target screen is not designed:** the goal card's chevron destination (§12 #6, only drawn), "Edit" next to Your pockets, the Settings button. Wishlist rows are not tappable until phase 8; "Check a product" and the robot show a placeholder toast until phases 6 and 7.
 - **Dev only:** Home has "Add the 5 sample wishlist items" and "Reset my data" buttons (not in production builds).
+
+## Phase 6 log: Check a product
+
+- **Screens, all checked against Figma** (`2026:2104` Snap, `2140` Reading, `2184` Match, `2223` Healthy, `3029` Not healthy, `2979` Pocket empty, `2841` N3, `2903` N4, `2940` N5, `2877` N6, `3079` N10): Snap, Reading (three real steps: identify, read price, fetch the pocket numbers), Match (edit price, change pocket, custom pocket, rescan), Reality (three verdicts), Problem (N4, N6). Not-healthy and empty numbers matched the frames to the cent (−$37.90, $52 left, "until Nov 1", 14 days).
+- **Server:** `/api/check` now also returns `overBy`, `refillDate`, `daysUntilRefill`, `duplicateAddedAt`; "left after buying" can be negative (Figma −$37.90) and is $0 for an already-empty pocket. 74 API tests.
+- **AI service:** new `reflect()` for the Reality card paragraph (mock builds it from the server's numbers); `camera_denied` dev scenario for N3.
+- **N3 is real:** "Take a photo" asks the browser's camera permission state first; blocked → N3. A web page cannot open the system Settings, so "Open Settings" re-asks for the camera and, if still blocked, shows a hint toast.
+- **Entry for Future Me on the Reality card** (your decision): an "Ask Future Me" link under the two buttons. Placement is mine; it shows a placeholder toast until phase 7.
+- **Copy I wrote (not in Figma):** the hero says "This costs you" (Figma: "These shoes cost you", which needs a product noun), "Looking at your product" (Figma: "your shoes"), pocket descriptions for Gadgets, Entertainment and Travel ("Everyday style stuff" is Figma's for Fashion), N10 body in ID.
+- **Assumptions:** "Check my reality" sits right under the content as in Figma; the product photo is only shown in memory during Reading; the price from the AI is treated as already in the profile currency.
+- **Dev only:** Home has "Spend $278/$330 in Fashion" buttons to reach Not healthy and Pocket empty.
